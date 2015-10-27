@@ -1,0 +1,6 @@
+from world.targetObject import TargetObject
+from world.particle import Particle
+
+class ParticleTarget(TargetObject, Particle):
+    def __init__(self, params):
+        

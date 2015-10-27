@@ -1,0 +1,9 @@
+package edu.cmu.cs.graphics.crowdsim.drivers;
+
+/**
+ * Represents a module that will be able to add or modify the command line arguments before 
+ * @author zkieda
+ */
+public class ArgsListenerModule {
+
+}

@@ -1,0 +1,11 @@
+from world.staticObject import StaticObject
+from world.mesh import Mesh
+
+class StaticMesh(Mesh, StaticObject):
+
+
+    def __init__(self, params):
+        '''
+        Constructor
+        '''
+        

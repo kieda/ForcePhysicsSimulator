@@ -1,0 +1,15 @@
+'''
+handle for the controller. Immutable for ease of use to the client.
+'''
+
+class Handle(object):
+    '''
+    classdocs
+    '''
+
+
+    def __init__(self, params):
+        '''
+        Constructor
+        '''
+        

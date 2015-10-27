@@ -1,0 +1,13 @@
+package edu.cmu.cs.graphics.crowdsim.ai.module;
+
+/**
+ * Tells the module runtime system which module types to accept when adding a 
+ * ModuleListener
+ * 
+ * Example code that listens to 
+ * 
+ * @author zkieda
+ */
+public @interface ListenOn {
+	public Class<? extends SubModule<?>> value();
+}

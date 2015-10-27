@@ -1,0 +1,71 @@
+package edu.cmu.cs.graphics.crowdsim.ai.module;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
+
+/**
+ * data structure for handling all of the module listeners and processing them.
+ * 
+ * Version 1.0: process and find applicable modules in a naive manner by searching 
+ * through the entire tree for applicable modules.
+ * Version 2.0: (todo) speed improvement by quickly being able to query modules in the tree that are of a single type.
+ * 
+ * Semantics: listeners will only accept modules that are in its own linking unit, 
+ * or the direct children of the initial linking unit.
+ * 
+ * @author zkieda
+ */
+public class ModuleListenerProcessor {
+	//class listeners that we're watching for.
+	private final Multimap<Class<?>, ModuleListener<?>> listeners = LinkedListMultimap.create(0); 
+	private Iterable<ModuleListener<?>> getListeners(final Class<?> c){
+		final Iterator<ModuleListener<?>> it = listeners.values().iterator();
+		return () -> new Iterator<ModuleListener<?>>(){
+			private boolean test(){
+				
+			}
+			
+			//1. get next
+			private void getNext(){
+				//find currentStream if possible
+				if(it.hasNext()){
+					
+				} 
+				hasNext = false;
+			}
+			
+			private boolean hasNext;
+			private ModuleListener<?> next;
+			
+			{
+				//kick off iteration.
+				getNext();
+			}
+			
+			@Override
+			public boolean hasNext() {
+				return hasNext;
+			}
+			
+			@Override
+			public ModuleListener<?> next() {
+				if(hasNext){
+					try{
+						return next;
+					} finally{
+						getNext();
+					}
+				}
+				throw new NoSuchElementException();
+			}
+		};
+	}
+}

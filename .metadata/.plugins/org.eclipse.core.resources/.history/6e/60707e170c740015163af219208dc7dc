@@ -1,0 +1,25 @@
+package edu.cmu.cs.graphics.crowdsim;
+
+import java.lang.reflect.ParameterizedType;
+
+import edu.cmu.cs.graphics.crowdsim.ai.module.ModuleListener;
+import edu.cmu.cs.graphics.crowdsim.ai.module.SubModule;
+
+public class Test {
+	public static void main(String[] args){
+		C<String, D> c = new C<>();
+		System.out.println((c.getClass().getTypeParameters()).length);
+		System.out.println(((ParameterizedType)(c.getClass().getGenericSuperclass()))
+	      .getActualTypeArguments()[0]);
+	}
+}
+class D extends SubModule{
+	
+}
+
+class C<A, B extends SubModule<?>> implements ModuleListener<B>{
+	@Override
+	public void accept(B t) {
+		System.out.println(t);
+	}
+}

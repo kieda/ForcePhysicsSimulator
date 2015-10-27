@@ -1,0 +1,7 @@
+from world.worldObject import WorldObject
+
+class StaticObject(WorldObject):
+    ''' represents 
+    def __init__(self, params):
+        return
+        

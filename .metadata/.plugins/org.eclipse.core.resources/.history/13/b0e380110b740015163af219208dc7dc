@@ -1,0 +1,20 @@
+package edu.cmu.cs.graphics.crowdsim;
+
+import edu.cmu.cs.graphics.crowdsim.ai.module.ModuleListener;
+import edu.cmu.cs.graphics.crowdsim.ai.module.SubModule;
+
+public class Test {
+	public static void main(String[] args){
+		C<String, >
+	}
+}
+class D extends SubModule{
+	
+}
+
+class C<A, B extends SubModule<?>> implements ModuleListener<B>{
+	@Override
+	public void accept(B t) {
+		System.out.println(t);
+	}
+}

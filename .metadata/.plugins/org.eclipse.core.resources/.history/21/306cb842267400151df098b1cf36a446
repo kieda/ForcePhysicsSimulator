@@ -1,0 +1,6 @@
+package edu.cmu.cs.graphics.crowdsim.ai.core;
+
+@
+public class NewFrameListenerModule implements Consumer<Runnable>{
+	public static interface 
+}

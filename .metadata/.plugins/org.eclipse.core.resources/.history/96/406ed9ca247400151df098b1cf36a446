@@ -1,0 +1,5 @@
+package edu.cmu.cs.graphics.crowdsim.serialize;
+
+public class SerializeListenerModule {
+
+}

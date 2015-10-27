@@ -1,0 +1,8 @@
+from world.worldObject import WorldObject
+
+class StaticObject(WorldObject):
+    def __init__(self, params):
+        '''
+        Constructor
+        '''
+        

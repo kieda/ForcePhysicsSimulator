@@ -1,0 +1,19 @@
+package edu.cmu.cs.graphics.crowdsim.ai.module;
+
+import java.util.function.Consumer;
+
+/**
+ * Used for a class that can listen for a specific 
+ * module type to be added to the module tree. One should 
+ * make a module that implements this class and place it 
+ * inside of the module system. It is highly advised that
+ * the user makes a fixed number of module listeners -- listeners
+ * are supposed to provide a basic 
+ * 
+ * When we add a module to the tree that extends ModuleListener, 
+ * we add the class to the list of active listeners.
+ * 
+ * @author zkieda
+ * @see ListenOn
+ */
+public interface ModuleListener<T extends SubModule<?>> extends Consumer<T> {}

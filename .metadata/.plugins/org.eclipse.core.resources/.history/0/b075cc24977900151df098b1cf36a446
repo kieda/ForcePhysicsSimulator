@@ -1,0 +1,16 @@
+'''
+note: previously named "evaluator". Controller is more general, since the client might
+not write an evaluator for their simulation, 
+'''
+
+class MyClass(object):
+    '''
+    classdocs
+    '''
+
+
+    def __init__(self, params):
+        '''
+        Constructor
+        '''
+        

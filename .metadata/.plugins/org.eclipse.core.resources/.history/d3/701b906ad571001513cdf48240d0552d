@@ -1,0 +1,9 @@
+package edu.cmu.cs.graphics.crowdsim.ai.module;
+
+/**
+ * Used for a class that can listen on  
+ * @author zkieda
+ */
+public interface ModuleListener {
+
+}

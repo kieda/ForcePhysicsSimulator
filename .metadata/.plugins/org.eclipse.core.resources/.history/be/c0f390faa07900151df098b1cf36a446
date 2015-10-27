@@ -1,0 +1,4 @@
+
+def serializeHandle(handle, out):
+    '''  
+    '''

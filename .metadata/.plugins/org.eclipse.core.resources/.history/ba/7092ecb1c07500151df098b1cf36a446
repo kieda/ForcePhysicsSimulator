@@ -1,0 +1,79 @@
+package edu.cmu.cs.graphics.crowdsim.module;
+
+import java.util.function.Consumer;
+
+import edu.cmu.cs.graphics.crowdsim.ai.core.GameUpdatable;
+import edu.cmu.cs.graphics.crowdsim.ai.core.Player;
+import edu.cmu.cs.graphics.crowdsim.module.AutoModuleLinker;
+import edu.cmu.cs.graphics.crowdsim.module.MultiModule;
+
+/**
+ * 
+ * @author zkieda
+ */
+public class SubModule implements GameUpdatable{
+    private MultiModule parent;
+    private ModuleListenerProcessor processor;
+    
+    ModuleListenerProcessor getProcessor(){
+    	return processor;
+    }
+    
+    protected void initListeners(){
+    	if(parent == null){
+    		processor = new ModuleListenerProcessor();
+    	} else{
+    		processor = parent.getProcessor();
+    	}
+        if(ModuleListenerProcessor.isProcessor(this.getClass())){
+    		processor.addListener((Consumer<?>)this);
+	    }
+    }
+    
+    protected void injectListeners(){
+    	processor.process(this);
+    }
+    
+    protected void initInjection(){
+        if(parent == null){
+            new AutoModuleLinker().init(this);
+            initListeners();
+            injectListeners();
+        } else if(processor == null){
+        	parent.initInjection();
+        }
+    }
+
+    public void init(MultiModule parent){
+        this.parent = parent;
+        if(getParent() == null || getParent().isInitialized()){
+        	processor = new ModuleListenerProcessor();
+            init();
+        } else processor = getParent().getProcessor();
+        
+        if(ModuleListenerProcessor.isProcessor(this.getClass()) && processor != null){
+        	//add the listener to the processor. 
+        	processor.addListener((Consumer<?>)this);
+        }
+        
+        if(getParent() == null || getParent().isInitialized()){
+        	//if this condition is satisfied, we are initializing 
+        	//this Module for the first time. 
+        	//We know that this linking unit will not grow any more,
+        	//so all of the listeners have been added to the processor
+        	//possible.
+        	
+        	//we test if this submodule is in our local processor.
+        	
+        	processor.process(this);
+        }
+    }
+    
+
+    public MultiModule getParent() {
+        return parent;
+    }
+    
+    public void init(){}
+    public void onFrameUpdate(){}
+}

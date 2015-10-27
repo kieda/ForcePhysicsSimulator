@@ -1,0 +1,42 @@
+'''
+handle for the controller. Immutable for ease of use to the client.
+'''
+
+class Handle:
+    def __init__(self):
+        '''
+        Constructor
+        '''
+    def getOtherSteps(self):
+    
+    def currentState(self):
+    
+    def stepBack(self):
+    def stepForward(self):
+    def stepDt(self):
+    def stepBackTill(self):
+    def stepForwardTill(self):
+    def applyActiveForce(self):
+    def applyActiveForces(self):
+    def removeActiveForce(self):
+    def filterActiveForces(self, filterFn):
+    def getActiveForceInfo(self):
+    def getActiveForces(self):
+    def getActiveForcesByObject(self):
+    
+    
+        
+# todo : have progress measure that can track how close objects are to their goal.
+# (movableObject, finalTransform, finalVelocity) -> double
+
+# possible : have "distance function" such that
+# distance :  (finalTransform, finalVelocity) ->  (movableObject) ->  double
+
+# then the progress is defined as 
+'''
+    let
+        dist = distance(finalTransform, finalVelocity)
+    in dist(finalObject) / dist(originalObject)
+    end 
+'''  
+# then 

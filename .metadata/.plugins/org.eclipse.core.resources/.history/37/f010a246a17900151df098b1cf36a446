@@ -1,0 +1,6 @@
+
+def serializeHandle(handle, out):
+    ''' Serializes a handle to some output stream.
+    handle : Handle, the handle we will serialize
+    out : 
+    '''

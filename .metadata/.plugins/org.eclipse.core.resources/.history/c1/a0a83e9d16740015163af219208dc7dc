@@ -1,0 +1,14 @@
+package edu.cmu.cs.graphics.crowdsim.ai.module;
+
+import java.util.function.Consumer;
+
+/**
+ 
+ * 
+ * Note: Every ModuleListener MUST have a @ListenOn annotation.
+ * 
+ * We use the ModuleListener<T> class 
+ * @author zkieda
+ * @see ListenOn
+ */
+public interface ModuleListener<T> extends Consumer<T> {}

@@ -1,0 +1,42 @@
+package edu.cmu.cs.graphics.crowdsim;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
+
+import edu.cmu.cs.graphics.crowdsim.ai.module.ModuleListener;
+import edu.cmu.cs.graphics.crowdsim.ai.module.SubModule;
+
+public class Test {
+	/**
+	 * @param args
+	 * @throws NoSuchMethodException
+	 * @throws SecurityException
+	 * @throws InvocationTargetException 
+	 * @throws IllegalArgumentException 
+	 * @throws IllegalAccessException 
+	 */
+	public static void main(String[] args) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
+		C<String, D> c = new C<String, D>(){
+			@Override
+			public void accept(D t) {
+				super.accept(t);
+//				t.pt();
+			}
+		};
+		try{
+//		System.out.println((c.getClass().getTypeParameters()[1]));
+			System.out.println(c.getClass().getMethod("accept", SubModule.class).invoke(c, new SubModule()));
+	}
+}
+class D extends SubModule{
+	public void pt(){
+		System.out.println("wow!");
+	}
+}
+
+class C<A, B extends SubModule<?>> implements ModuleListener<B>{
+	@Override
+	public void accept(B t) {
+		System.out.println(t);
+	}
+}

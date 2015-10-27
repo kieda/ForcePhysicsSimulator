@@ -1,0 +1,4 @@
+
+class MeshTarget(object):
+
+    def __init__(self, params):        

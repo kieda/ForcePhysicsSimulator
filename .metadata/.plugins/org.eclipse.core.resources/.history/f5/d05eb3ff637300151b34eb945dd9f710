@@ -1,0 +1,5 @@
+from world.targetObject import TargetObject
+
+class MeshTarget(TargetObject):
+
+    def __init__(self, params):        

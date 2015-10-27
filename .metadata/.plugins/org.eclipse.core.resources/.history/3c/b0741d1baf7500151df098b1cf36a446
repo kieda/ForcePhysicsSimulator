@@ -1,0 +1,36 @@
+package edu.cmu.cs.graphics.crowdsim.serialize;
+
+import java.io.OutputStream;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+
+import edu.cmu.cs.graphics.crowdsim.drivers.ArgsListenerModule.ArgsListener;
+import edu.cmu.cs.graphics.crowdsim.module.SubModule;
+import edu.cmu.cs.graphics.crowdsim.serialize.SerializeGame.GameSerializationMethod;
+
+public class FileSerializationOut extends SubModule implements GameSerializationMethod, ArgsListener {
+
+	@Override
+	public OutputStream get() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void modifyOptions(Options o) {
+	}
+
+	@Override
+	public void result(CommandLine cl) {
+		// TODO Auto-generated method stub
+		String fileName;
+        switch(cl.getArgs().length){
+            case 0: fileName = "../CrowdSimulation/Assets/core/corescript";
+                break;
+            default: fileName = cl.getArgs()[0];
+        }
+        
+	}
+
+}

@@ -1,0 +1,29 @@
+package edu.cmu.cs.graphics.crowdsim;
+
+import java.lang.reflect.ParameterizedType;
+
+import edu.cmu.cs.graphics.crowdsim.ai.module.ModuleListener;
+import edu.cmu.cs.graphics.crowdsim.ai.module.SubModule;
+
+public class Test {
+	/**
+	 * @param args
+	 * @throws NoSuchMethodException
+	 * @throws SecurityException
+	 */
+	public static void main(String[] args) throws NoSuchMethodException, SecurityException{
+		C<String, D> c = new C<>();
+		System.out.println((c.getClass().getTypeParameters()[1]));
+		System.out.println(c.getClass().getMethod("accept", SubModule.class).getTypeParameters().length);
+	}
+}
+class D extends SubModule{
+	
+}
+
+class C<A, B extends SubModule<?>> implements ModuleListener<B>{
+	@Override
+	public void accept(B t) {
+		System.out.println(t);
+	}
+}

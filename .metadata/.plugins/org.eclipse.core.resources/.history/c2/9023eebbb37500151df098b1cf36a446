@@ -1,0 +1,9 @@
+import
+	edu.cmu.cs.graphics.crowdsim.serialize.*
+in
+	Game: has
+		ArgsListenerModule
+		SerializeGame : SerializeListenerModule
+		NewFrameListenerModule
+	end
+end

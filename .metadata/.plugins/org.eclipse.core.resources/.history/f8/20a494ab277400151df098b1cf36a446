@@ -1,0 +1,28 @@
+package edu.cmu.cs.graphics.crowdsim.drivers;
+
+import java.util.function.Consumer;
+
+import org.apache.commons.cli.Options;
+
+/**
+ * 
+ * Represents a module that will be able to add or modify the command line arguments before
+ * we process them. This will happen before the game actually starts, and we load the 
+ * initial game environment.
+ * 
+ * This will allow certain game aspects to change the behavior of the command line arguments.
+ * 
+ * It is highly suggested that modules should NOT modify the command line arguments after they have
+ * already been processed, such that  
+ * 
+ * @author zkieda
+ */
+@ListenOn(ArgsListenerModule.ArgsListener.class)
+public class ArgsListenerModule implements Consumer<Consumer<Options>> {
+	public static interface ArgsListener extends Consumer<Options>{};
+	
+	@Override
+	public void accept(Consumer<Options> t) {
+		// t represents some consumer that will modify the command line options.
+	}
+}

@@ -1,0 +1,9 @@
+package edu.cmu.cs.graphics.crowdsim.ai.module;
+
+/**
+ * 
+ * @author zkieda
+ */
+public @interface ListenOn {
+
+}

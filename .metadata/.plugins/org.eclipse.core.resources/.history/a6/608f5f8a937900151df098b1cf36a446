@@ -1,0 +1,4 @@
+class Tri(object):
+    def __init__(self):
+        
+        

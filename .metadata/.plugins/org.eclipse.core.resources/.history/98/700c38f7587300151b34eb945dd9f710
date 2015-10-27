@@ -1,0 +1,7 @@
+
+''' represents an object that is merely static.
+    Notably, we use this  
+'''
+class StaticObject(object):
+    def __init__(self):
+        

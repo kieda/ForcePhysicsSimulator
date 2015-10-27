@@ -1,0 +1,16 @@
+package edu.cmu.cs.graphics.crowdsim.drivers;
+
+/**
+ * 
+ * Represents a module that will be able to add or modify the command line arguments before
+ * we process them. This will happen before the game actually starts, and we load the 
+ * initial game environment.
+ * 
+ * This will allow certain game aspects to change the behavior of the command line arguments.
+ * 
+ * It is highly suggested 
+ * @author zkieda
+ */
+public class ArgsListenerModule {
+
+}

@@ -1,0 +1,17 @@
+'''
+handle for the controller. Immutable for ease of use to the client.
+'''
+
+class Handle:
+    def __init__(self):
+        '''
+        Constructor
+        '''
+    def getOtherSteps(self):
+    
+    def currentState(self):
+    
+    def stepBack(self):
+    
+        
+        

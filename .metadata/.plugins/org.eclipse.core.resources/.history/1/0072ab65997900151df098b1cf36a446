@@ -1,0 +1,13 @@
+'''
+note: previously named "evaluator". Controller is more general, since the client might
+not write an evaluator for their simulation, they're just writing a method to control
+the system.
+
+We provide an evaluator controller, however, as a basic method for clients to use.
+'''
+
+class Controller:
+        
+        
+    
+        

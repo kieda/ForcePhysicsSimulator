@@ -1,0 +1,10 @@
+
+class DynamicObject(object):
+    def __init__(self, velocityI, goalTransformation, velocityGoal):
+        self.startVelocity = velocityI.copy()
+    
+    
+# layout : 
+#     
+        
+        

@@ -1,0 +1,17 @@
+'''
+Created on Oct 23, 2015
+
+@author: zkieda
+'''
+
+class DynamicMesh(object):
+    '''
+    classdocs
+    '''
+
+
+    def __init__(self, params):
+        '''
+        Constructor
+        '''
+        

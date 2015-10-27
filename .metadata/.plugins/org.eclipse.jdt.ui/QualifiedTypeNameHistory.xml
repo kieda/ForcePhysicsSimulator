@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="edu.cmu.cs464.p3.util.quadtree.QuadTree"/>
+<fullyQualifiedTypeName name="edu.cmu.cs.graphics.crowdsim.ai.module.AutoWiredException"/>
+<fullyQualifiedTypeName name="java.util.function.Consumer"/>
+<fullyQualifiedTypeName name="edu.cmu.cs.graphics.crowdsim.ai.module.SubModule"/>
+<fullyQualifiedTypeName name="edu.cmu.cs.graphics.crowdsim.ai.module.ModuleListener"/>
+<fullyQualifiedTypeName name="edu.cmu.cs.graphics.crowdsim.ai.module.ListenOn"/>
+<fullyQualifiedTypeName name="java.util.List"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="java.util.LinkedList"/>
+<fullyQualifiedTypeName name="com.google.common.collect.Multimap"/>
+<fullyQualifiedTypeName name="com.google.common.collect.LinkedListMultimap"/>
+<fullyQualifiedTypeName name="java.lang.Iterable"/>
+<fullyQualifiedTypeName name="java.util.Map"/>
+<fullyQualifiedTypeName name="java.util.Map.Entry"/>
+<fullyQualifiedTypeName name="java.util.Collection"/>
+<fullyQualifiedTypeName name="java.util.NoSuchElementException"/>
+</qualifiedTypeNameHistroy>

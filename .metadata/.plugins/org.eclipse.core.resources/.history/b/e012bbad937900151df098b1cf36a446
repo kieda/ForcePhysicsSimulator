@@ -1,0 +1,5 @@
+class Tri(object):
+    ''' represents a triangle usefule for boundary planes in three dimensions '''
+    def __init__(self):
+        return
+        
