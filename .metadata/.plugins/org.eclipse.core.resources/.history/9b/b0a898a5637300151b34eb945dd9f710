@@ -1,7 +1,0 @@
-class Particle(object):
-
-    def __init__(self, params):
-        '''
-        Constructor
-        '''
-        

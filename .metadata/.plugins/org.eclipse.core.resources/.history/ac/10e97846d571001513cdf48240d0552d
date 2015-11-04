@@ -1,5 +1,0 @@
-package edu.cmu.cs.graphics.crowdsim.ai.module;
-
-public @interface ModuleListener {
-
-}

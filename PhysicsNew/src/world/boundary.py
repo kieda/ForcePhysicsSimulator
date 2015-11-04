@@ -1,0 +1,199 @@
+from scipy.stats.vonmises_cython import numpy
+from abc import abstractmethod
+from test.test_decorators import memoize
+from world.connection import Connection2D, Connection3D
+
+class Boundary(object):
+    ''' 
+    abstract class that represents a boundary.
+    Methods are defined in a generic way that will allow
+    a broad range of extensions
+    '''
+    def __init__(self, dim):
+        self.dim = dim
+        return
+    
+    @abstractmethod
+    def getConnection(self, otherBoundary):
+        '''
+        @param otherBoundary: another boundary that we will test
+        for a connection.
+        @return: The connection between this boundary and the other.
+        Must be an instance of world.connection.BoundaryConnection
+        '''
+        return
+    
+    @abstractmethod
+    def isParallel(self, boundary):
+        '''
+        @param boundary: another boundary that we will test if it's 
+        parallel to this ones
+        @return: True iff the other boundary is parallel to this one.
+        In the 2d case, they must be along the same line, while 
+        the two boundary planes must be level in the 3d case.
+        '''
+        return 
+    
+    @abstractmethod
+    def carvedVolume(self):
+        '''
+        Finds the volume that this boundary carves out with respect
+        to the origin. 
+        
+        This is important for finding the total volume of a closed mesh
+        given in this paper
+        http://research.microsoft.com/en-us/um/people/chazhang/publications/icip01_ChaZhang.pdf
+        
+        Note that this value can be positive or negative. Faces that have a normal 
+        that face away from the origin should have a positive result, and a 
+        face that have a normal towards the origin should have a negative result.
+        
+        Faces that have a normal perpendicular to the origin should have 0.0 volume.
+        
+        Note that the implementation should not be concerned with the direction of the normal
+        with respect to the mesh and should not compensate for this. A mesh will automatically
+        change the sign of the carvedVolume if they are oriented in the wrong direction.
+        '''
+        return
+    
+class Boundary2D(Boundary):
+    '''
+    Boundary2D. Representation -- a base position and a 
+    vector that describes the offset of the other point.
+    
+    Essentially a line in two dimensions.
+    '''
+    def __init__(self, x1, y1, x2, y2):
+        '''
+        @param x1: The first position of the boundary (x axis)
+        @param y1: The first position of the boundary (y axis)
+        @param x2: The second position of the boundary (x axis)
+        @param y2: The second position of the boundary (y axis)
+        '''
+        super(Boundary, self).__init__(2)
+        self.pos = numpy.array([x1, y1])
+        self.vec = numpy.array([x2, y2]) - self.pos
+    
+    
+    def getConnection(self, otherBoundary):
+        for a in xrange(self.dim):
+            for b in xrange(self.dim):
+                if self.toArray()[a] == otherBoundary.toArray()[b]:
+                     return Connection2D(self, otherBoundary, a, b)
+        return None
+    
+    def point1(self):
+        return self.pos
+    
+    def point2(self):
+        return self.pos + self.vec
+    
+    def isParallel(self, boundary):
+        '''
+        The boundaries should be parallel if the norms are equal
+        todo make approx equal
+        '''
+        return self.norm() == boundary.norm() or \
+             - self.norm() == boundary.norm()
+    
+    @memoize
+    def norm(self):
+        '''
+        return a unit vector in the direction of the norm.
+        '''
+        v = numpy.array([-self.vec[1], self.vec[0]])
+        return v / numpy.linalg.norm(v) 
+    
+    def carvedVolume(self):
+        # signum(N . pos) * ||pos x vec||/2
+        return numpy.sign(numpy.dot(self.pos, self.norm())) \
+             * numpy.linalg.norm(numpy.cross(self.pos, self.vec)) / 2
+    
+    @memoize
+    def toArray(self):
+        return numpy.array([self.point1(), self.point2()])
+    
+class Boundary3D(Boundary):
+    '''
+    Boundary3D. Representation -- a base position and two vectors
+    that describe the other two vertices. 
+    
+    Essentially a triangle in three dimensions. We disallow triangles
+    with zero area.
+    '''
+    def __init__(self, x1, y1, z1, x2, y2, z2, x3, y3, z3):
+        '''
+        @param x1: The first position of the boundary (x axis)
+        @param y1: The first position of the boundary (y axis)
+        @param x2: The second position of the boundary (x axis)
+        @param y2: The second position of the boundary (y axis)
+        '''
+        super(Boundary, self).__init__(3)
+        self.pos = numpy.array([x1, y1, z1])
+        self.vec1 = numpy.array([x2, y2, z2]) - self.pos
+        self.vec2 = numpy.array([x3, y3, z3]) - self.pos
+        
+        if self.area() == 0:
+            raise ValueError("Error: specified triangle has zero area. Either all three points are the same or all three lie on the same line")
+        
+        
+    def area(self):
+        ''' 
+        returns the area of this boundary.
+        I'm still not sure if this will have any use
+        '''
+        return numpy.linalg.norm(numpy.cross(self.vec1, self.vec2)) / 2.0
+    
+    @memoize
+    def norm(self):
+        '''
+        Returns normal to this plane
+        '''
+        v = numpy.cross(self.vec1, self.vec2)
+        return v / numpy.linalg.norm(v)
+    
+    def getConnection(self, otherBoundary):
+        for a in xrange(self.dim):
+            for b in xrange(a+1, self.dim):
+                for c in xrange(self.dim):
+                    for d in xrange(self.dim):
+                        if c == d:
+                            continue
+                        if self.toArray()[a] == otherBoundary.toArray()[c] and \
+                           self.toArray()[b] == otherBoundary.toArray()[d]:
+                            return Connection3D(self, otherBoundary, a, b, c, d)
+                
+        return None
+    
+    def isParallel(self, boundary):
+        return boundary.norm() == self.norm() \
+            or -boundary.norm() == self.norm()
+    
+    @memoize
+    def carvedVolume(self):
+        '''
+        Basic linalg, since we carve out volume from the origin.
+        
+        Then, let a = pos - O, b = vec1, c = vec2
+        
+        Then V = (a * (b x c)) / 6
+        
+        The first term is for the direction this volume is with respect to 
+        the origin.
+        '''
+        return numpy.sign(numpy.dot(self.pos, self.norm())) \
+             * numpy.dot(self.pos, numpy.cross(self.vec1, self.vec2)) / 6.0
+    
+    def point1(self):
+        return self.pos
+    
+    def point2(self):
+        return self.pos + self.vec1
+    
+    def point3(self):
+        return self.pos + self.vec2
+    
+    @memoize
+    def toArray(self):
+        return numpy.array([self.point1(), self.point2(), self.point3()])
+    

@@ -1,6 +1,0 @@
-class SerializeHanle:
-    def __init__(self, params):
-        '''
-        Constructor
-        '''
-        

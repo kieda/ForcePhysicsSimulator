@@ -1,8 +1,0 @@
-
-''' represents an object that is merely static.
-
-    Notably, we use this for boundaries in the simulation.  
-'''
-class StaticObject(object):
-    def __init__(self):
-        

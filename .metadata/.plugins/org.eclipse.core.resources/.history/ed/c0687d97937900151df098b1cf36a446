@@ -1,5 +1,0 @@
-class Tri(object):
-    ''' represents a triangle 
-    def __init__(self):
-        return
-        

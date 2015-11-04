@@ -1,4 +1,0 @@
-class TargetObject(object):
-
-    def __init__(self, params):
-        

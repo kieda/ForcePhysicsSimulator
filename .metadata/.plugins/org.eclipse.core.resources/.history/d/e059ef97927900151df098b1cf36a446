@@ -1,5 +1,0 @@
-from world.dynamicObject import DynamicObject
-
-class TargetObject(DynamicObject):
-    def __init__(self, params):
-        

@@ -1,6 +1,0 @@
-
-class DynamicObject(object):
-
-    def __init__(self, params):
-        
-        

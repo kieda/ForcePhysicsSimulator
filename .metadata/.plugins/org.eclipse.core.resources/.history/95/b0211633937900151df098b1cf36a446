@@ -1,8 +1,0 @@
-from world.dynamicObject import DynamicObject
-
-'''
-
-'''
-class MovableObject(DynamicObject):
-    def __init__(self, params):
-        

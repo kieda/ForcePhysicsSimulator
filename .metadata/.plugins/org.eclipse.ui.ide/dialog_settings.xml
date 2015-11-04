@@ -5,6 +5,7 @@
 		<item value="false" key="WizardProjectsImportPage.STORE_COPY_PROJECT_ID"/>
 		<item value="false" key="WizardProjectsImportPage.STORE_ARCHIVE_SELECTED"/>
 		<list key="WizardProjectsImportPage.STORE_DIRECTORIES">
+			<item value="/Users/zkieda/Documents/workspace"/>
 			<item value="/Users/zkieda/Documents/ModLang/ModLang"/>
 		</list>
 		<list key="WizardProjectsImportPage.STORE_ARCHIVES">
@@ -16,5 +17,19 @@
 		<list key="NewWizardSelectionPage.STORE_EXPANDED_CATEGORIES_ID">
 			<item value="org.python.pydev.PythonCategory"/>
 		</list>
+	</section>
+	<section name="org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog">
+		<item value="false" key="FilterByLocation"/>
+		<item value="true" key="ShowStatusLine"/>
+		<item value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#x0A;&lt;History&gt;&#x0A;&lt;historyRootNode&gt;&#x0A;&lt;infoNode path=&quot;/emotion-crowd-simulation/src/main/java/edu/cmu/cs/graphics/crowdsim/ai/core/NewFrameListenerModule.java&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/emotion-crowd-simulation/src/main/java/edu/cmu/cs/graphics/crowdsim/serialize/FileSerializationOut.java&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/emotion-crowd-simulation/src/main/java/edu/cmu/cs/graphics/crowdsim/ai/core/BasicInitialStateGenerator.java&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/emotion-crowd-simulation/src/main/java/edu/cmu/cs/graphics/crowdsim/serialize/SerializeGame.java&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/emotion-crowd-simulation/src/main/java/edu/cmu/cs/graphics/crowdsim/ai/core/Player.java&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/emotion-crowd-simulation/src/main/java/edu/cmu/cs/graphics/crowdsim/drivers/Main.java&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/emotion-crowd-simulation/src/main/java/edu/cmu/cs/graphics/crowdsim/serialize/SerializeListenerModule.java&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/emotion-crowd-simulation/src/main/java/edu/cmu/cs/graphics/crowdsim/ai/core/Game.java&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/emotion-crowd-simulation/src/main/java/edu/cmu/cs/graphics/crowdsim/Game.mod&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/emotion-crowd-simulation/pom.xml&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/PhysicsNew/src/world/dynamicObject.py&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/emotion-crowd-simulation/src/main/java/edu/cmu/cs/graphics/crowdsim/drivers/ArgsListenerModule.java&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/PhysicsNew/src/world/boundary.py&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/PhysicsNew/src/world/connection.py&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;/historyRootNode&gt;&#x0A;&lt;/History&gt;" key="History"/>
+		<item value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#x0A;&lt;workingSet workingSetName=&quot;&quot;/&gt;" key="WorkingSet"/>
+		<item value="false" key="ShowDerived"/>
+		<section name="DialogBoundsSettings">
+			<item value="600" key="DIALOG_WIDTH"/>
+			<item value="1|.SF NS Text|11.0|0|COCOA|1|.SFNSText-Regular" key="DIALOG_FONT_NAME"/>
+			<item value="500" key="DIALOG_HEIGHT"/>
+			<item value="540" key="DIALOG_X_ORIGIN"/>
+			<item value="146" key="DIALOG_Y_ORIGIN"/>
+		</section>
 	</section>
 </section>

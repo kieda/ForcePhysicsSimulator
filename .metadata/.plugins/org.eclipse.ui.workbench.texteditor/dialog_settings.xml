@@ -2,12 +2,16 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="UnitNormal" key="selection"/>
+		<item value="isNeighbor" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="isNeighbor"/>
+			<item value="BoundaryCrossing"/>
+			<item value="print_warning"/>
+			<item value="simulate"/>
 			<item value="unitNormal"/>
 		</list>
 		<list key="replacehistory">

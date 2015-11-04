@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;PhysicsNew/src/world/edge.py&apos; to &apos;connection.py&apos;" description="Rename resource &apos;edge.py&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="src/world/edge.py" name="connection.py" stamp="1446592219808" updateReferences="true"/>
+</session>

@@ -1,38 +1,66 @@
 '''
 handle for the controller. Immutable for ease of use to the client.
 '''
+import copy.copy
 
 class Handle:
+    
     def __init__(self):
+        self.activeForces = {}
+        self.parent = None
+        self.children = []
+        self.idCount = 0
+    
+    def _branch(self):
+        handle = Handle()
+        handle.parent = self
+        handle.activeForces = copy(self.activeForces)
+        handle.idCount = self.idCount
+        self.children.append(handle)
+        return handle
         
     def getOtherSteps(self):
-        
+        return self.children
+    
     def currentState(self):
+        return self.state
         
     def stepBack(self):
-        
+        return self.parent
+    
     def stepForward(self):
-        
-    def stepDt(self, dt):
-        
-    def stepBackTill(self, evt):
-        
-    def stepForwardTill(self, evt):
+        # 1. branch, 2. 
+        return self._branch()
         
     def applyActiveForce(self, movableObject, force, phase):
+        id = self.idCount
+        self.idCount = self.idCount + 1
         
+        return self._branch()
     def applyActiveForces(self, movableObject, forces):
-        
-    def removeActiveForce(self, ):
+        handle = self
+        for force, phase in forces:
+            handle = handle.applyActiveForce(movableObject, force, phase)
+        return handle
+    def removeActiveForce(self, id):
+        handle = self._branch()
+        handle.activeForces.remove(id)
+        return handle
         
     def filterActiveForces(self, filterFn):
-        
-    def getActiveForceInfo(self):
+        handle = self
+        for id, force in self.activeForces:
+             handle = handle.removeActiveForce(id)
+        return handle
+    
+    def getActiveForceInfo(self, id):
+        return self.activeForces[id]
         
     def getActiveForces(self):
-        
-    def getActiveForcesByObject(self):
-        
+        return self.activeForces
+    
+    def getActiveForcesByObject(self, movableObject):
+        return [id for id, force in self.activeForces if movableObject is force.movableObject]
     
     
         

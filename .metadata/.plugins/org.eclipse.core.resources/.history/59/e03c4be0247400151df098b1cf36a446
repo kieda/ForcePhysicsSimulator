@@ -1,9 +1,0 @@
-package edu.cmu.cs.graphics.crowdsim.serialize;
-
-/**
- * listens for serializable classes
- * @author zkieda
- */
-public class SerializeListenerModule {
-
-}

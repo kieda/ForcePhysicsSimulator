@@ -1,5 +1,0 @@
-package edu.cmu.cs.graphics.crowdsim.ai.core;
-
-public class NewFrameListenerModule implements Consumer<>{
-	public static interface 
-}

@@ -1,5 +1,0 @@
-
-class StaticObject(object):
-
-    def __init__(self):
-        

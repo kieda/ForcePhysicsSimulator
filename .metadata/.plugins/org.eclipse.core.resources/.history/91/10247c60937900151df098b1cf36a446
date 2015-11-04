@@ -1,5 +1,0 @@
-class Particle(object):
-    ''' represents a single point 
-    def __init__(self, params):
-        
-        

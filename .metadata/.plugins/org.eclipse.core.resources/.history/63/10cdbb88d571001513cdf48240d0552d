@@ -1,9 +1,0 @@
-package edu.cmu.cs.graphics.crowdsim.ai.module;
-
-import java.util.function.Consumer;
-
-/**
- * Used for a class that can listen on  
- * @author zkieda
- */
-public interface ModuleListener<T> extends Consumer<T> {}

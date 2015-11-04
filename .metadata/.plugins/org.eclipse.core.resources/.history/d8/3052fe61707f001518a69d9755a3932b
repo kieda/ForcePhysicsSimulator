@@ -1,0 +1,32 @@
+from abc import abstractmethod
+import numpy
+
+class WorldObject(object):
+    
+    def __init__(self, dim, pos):
+        ''' 
+        @param dim: the number of dimensions that we are using. Currently we only support 2d and 3d
+        @param pos: 2d or 3d vector that represents the position of the object.
+        ''' 
+        if dim not in [2, 3]:
+            raise ValueError("Invalid dimension value \"" + dim + "\", only 2 or 3 allowed.")
+        
+        if not isinstance(pos, numpy.ndarray):
+            raise TypeError("pos should be of type ")
+        
+        self.pos = pos
+        self.collisions = set()
+        return
+    
+    @abstractmethod
+    def testCollision(self, other):    
+        return
+    
+    def addCollision(self, collidingObject):
+        ''' 
+        @param collidingObject : the object that this worldObject has collided with 
+        '''
+        self.collisions.add(collidingObject)
+    
+    def removeCollision(self, collidingObject):
+        self.collisions.remove(collidingObject)

@@ -1,5 +1,0 @@
-''' represents the state of 
-
-class State:
-    def __init__(self):
-        return

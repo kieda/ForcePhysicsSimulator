@@ -1,0 +1,13 @@
+from world.worldObject import WorldObject
+
+class StaticObject(WorldObject):
+    ''' 
+    represents an object that cannot move. 
+    Massless.
+    '''
+    def __init__(self, pos):
+        ''' 
+        @param pos 2d or 3d vector that represents the position of the object.
+        ''' 
+        self.pos = pos
+        
