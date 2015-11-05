@@ -1,0 +1,188 @@
+from test.test_decorators import memoize
+from world.staticObject import StaticObject
+import numpy
+import array
+
+
+class Face(StaticObject):
+    '''
+    A face represents a series of boundaries that
+    are parallel to one another.
+    
+    When the user specifies a series of triangles that
+    form a polygon in three-space, it's useful to treat it like a
+    single object, so we don't emit an excessive number of boundary crossing
+    events as a particle moves across the polygon's surface.
+    '''
+    def __init__(self, dim, boundaries):
+        #initial position is just (0, 0, 0) in its own local space.
+        #we transform this as we go in the face's local space, then
+        #translate wrt the mesh's world position.
+        super(StaticObject, self).__init__(dim, numpy.zeros(dim))
+        self.boundaries = boundaries
+        
+        if not self._checkBoundaries():
+            raise ValueError("All boundaries specified are not parallel in this face " + boundaries)
+        
+    def _checkBoundaries(self):
+        '''
+        Checks that all boundaries inside of this face are indeed parallel.
+        '''
+        
+        if len(self.boundaries) == 0 :
+            return True
+        ''' 
+        Use this method since parallelism is transitive and symmetric 
+        '''
+        b0 = self.boundaries[0]
+        for bi in self.boundaries[1:]:
+            if not b0.isParallel(bi):
+                return False
+        
+        return True
+    
+    @memoize
+    def getExterior(self):
+        '''
+        returns an array of all of the boundaries that are on the outside of this
+        face. This is nice if we want to find all of the faces adjacent to this one
+        '''
+        
+class Mesh(object):
+    '''
+    Represents a mesh. Defined by a non-empty sequence of boundaries
+    in two or three dimensions.
+    
+    We disallow disconnected meshes.
+    '''
+    def __init__(self, dim, boundaries):
+        '''
+        @param boundaries: the boundaries that are on this mesh.
+        '''
+        if len(boundaries) == 0:
+            raise ValueError("A mesh must contain one or more boundaries!")
+        
+        # boundaries are paired with their respective faces
+        self.boundaries = boundaries
+        self.neighborMap = self._buildNeighborMap() # map of boundary -> neighboring boundaries
+        self.normals = self._calculateNormals()
+        
+        if self._isConnected():
+            raise ValueError("Specified mesh is disconnected!")
+        
+        self.faces = None # calculated faces
+    
+    def _buildNeighborMap(self):
+        '''
+        Here we build the map of neighbors for each face.
+        currently unimplemented, so we have two options
+        
+        1. Use a naive O(n^2) algorithm where we check each 
+        boundary against each other (maybe a bad idea)
+        2. Use a set to determine vertices that are relatively
+        close, then we just grab all of the objects inside of the
+        same bucket and check neighbors there (probably better, can eliminate
+        many checks). Can cut cost from n choose 2 to n in the 2d case.
+        '''
+        
+        neighborMap={}
+        for i, boundary in enumerate(self.boundaries):
+            # create set for each boundary.
+            neighbors = array.array()
+            
+            for j, neighbor in enumerate(self.boundaries):
+                if i == j: 
+                    continue
+                edge = boundary.getConnection(neighbor)
+                if edge:
+                    neighbors.append((neighbor, edge))
+                    
+            neighborMap[boundary] = neighbors
+            
+        return neighborMap
+    
+    def _isConnected(self):
+        '''
+        Tests the connectivity of this mesh. We might have a mesh
+        where all of the edges have neighbors, but is disconnected.
+        
+        We disallow this case
+        '''
+        
+        visited = set()
+        frontier = [self.boundaries[0]]
+        
+        while True:
+            next = frontier.pop()
+            if next in visited:
+                continue
+            visited.add(next)
+            for neighbor, edge in self.neighborMap[next]:
+                frontier.append(neighbor)
+            
+            if len(frontier) == 0:
+                break
+        
+        # we should have visited each boundary. Otherwise we 
+        # have a connection problem, housten!
+        return len(visited) == len(self.boundaries)
+    
+    @memoize
+    def isClosed(self):
+        '''
+        @return: True iff this mesh is a closed surface.
+        '''
+        for boundary, neighbors in self.neighborMap:
+            #need dim neighbors
+            
+            #self.dim should never be <1
+            if len(neighbors) != self.dim:
+                return False
+            
+            # the first neighbor
+            (neighbor0, edge0) = neighbors[0]
+            
+            for neighbori, edgei in neighbors[1:]:
+                # check that all of the other edges are 
+                # not 
+        return True
+    
+    def _calculateNormals(self):
+        '''
+        @return: a list of length len(boundaries) where each element corresponds to 
+        -1 or 1. -1 if we want to flip the normal, 1 otherwise.
+        @requires: self.neighborMap is defined and built correctly
+        '''
+        return 
+    
+    @memoize
+    def volume(self):
+        if not self.isClosed():
+            raise RuntimeError("Cannot find the volume on a non-closed mesh")
+        volume = 0.0
+        for norm, b in zip(self.normals, self.boundaries):
+            #carved volume with respect to the origin
+            volume = volume + norm * b.carvedVolume()
+            
+        return volume
+        
+    def getFaces(self):
+        return self.faces
+    
+# we provide these methods in case the user wants to 
+# have a consitency of material. 
+# A typical use case involves having an object that the user 
+# wants a certain mass, then for material consistency has every
+# object of the same mass 
+
+def calculateMass(density, mesh):
+    '''
+    Calculate the mass of a mesh given its density
+    '''
+    return mesh.volume() * density
+    
+def calculateDensity(mass, mesh):
+    '''
+    Calculate the density of a mesh given its mass
+    '''
+    return mass / mesh.volume()

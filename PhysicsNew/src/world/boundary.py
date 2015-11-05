@@ -78,14 +78,14 @@ class Boundary2D(Boundary):
     def getConnection(self, otherBoundary):
         for a in xrange(self.dim):
             for b in xrange(self.dim):
-                if self.toArray()[a] == otherBoundary.toArray()[b]:
+                if self.get(a) == otherBoundary.get(b):
                      return Connection2D(self, otherBoundary, a, b)
         return None
     
-    def point1(self):
+    def vertex1(self):
         return self.pos
     
-    def point2(self):
+    def vertex2(self):
         return self.pos + self.vec
     
     def isParallel(self, boundary):
@@ -110,8 +110,11 @@ class Boundary2D(Boundary):
              * numpy.linalg.norm(numpy.cross(self.pos, self.vec)) / 2
     
     @memoize
-    def toArray(self):
-        return numpy.array([self.point1(), self.point2()])
+    def get(self, idx):
+        '''
+        Returns the ith vertex
+        '''
+        return numpy.array([self.vertex1(), self.vertex2()])[idx]
     
 class Boundary3D(Boundary):
     '''
@@ -159,8 +162,8 @@ class Boundary3D(Boundary):
                     for d in xrange(self.dim):
                         if c == d:
                             continue
-                        if self.toArray()[a] == otherBoundary.toArray()[c] and \
-                           self.toArray()[b] == otherBoundary.toArray()[d]:
+                        if self.get(a) == otherBoundary.get(c) and \
+                           self.get(b) == otherBoundary.get(d):
                             return Connection3D(self, otherBoundary, a, b, c, d)
                 
         return None
@@ -184,16 +187,19 @@ class Boundary3D(Boundary):
         return numpy.sign(numpy.dot(self.pos, self.norm())) \
              * numpy.dot(self.pos, numpy.cross(self.vec1, self.vec2)) / 6.0
     
-    def point1(self):
+    def vertex1(self):
         return self.pos
     
-    def point2(self):
+    def vertex2(self):
         return self.pos + self.vec1
     
-    def point3(self):
+    def vertex3(self):
         return self.pos + self.vec2
     
     @memoize
-    def toArray(self):
-        return numpy.array([self.point1(), self.point2(), self.point3()])
+    def get(self, idx):
+        '''
+        Returns the ith vertex
+        '''
+        return numpy.array([self.vertex1(), self.vertex2(), self.vertex3()])[idx]
     

@@ -10,11 +10,10 @@ class BoundaryConnection(object):
         '''
         @param dim: the dimension of this edge 
         '''
-        
         self.dim = dim
         
     @abstractmethod
-    def isConsistent(self):
+    def isConsistent(self, map={}):
         '''
         Since an edge is a connection between two boundaries, the 
         two boundaries that form this edge can either be consistent
@@ -29,16 +28,21 @@ class BoundaryConnection(object):
         
         (this makes sense since more advanced normals may average 
         against several meshes)
+        
+        @param map: Optional parameter. Allows the client to define 
+        a (Boundary -> {-1, 1}) map such that we will flip the normal
+        on boundary b if map[b] = -1.  If the element is not found, 
+        (i.e. map[b] = None), we do not flip the normal.
         '''
         return
     
     @abstractmethod
-    def getInfo(self):
+    def connectionEqual(self, other):
         '''
-        Returns the vertices or information that makes up the connection
-        of the edge.
-        '''
-        return 
+        @return: True if this connection and the other connection define
+        the same edge. Note that two connections defined by two different 
+        boundaries CAN define the same edge.
+        ''' 
     
     
 class Connection2D(BoundaryConnection):
@@ -57,8 +61,8 @@ class Connection2D(BoundaryConnection):
         
         value  | Description
         -------|----------------------
-        0      | boundary.point1()
-        1      | boundary.point2()
+        0      | boundary.vertex1()
+        1      | boundary.vertex2()
         '''
         super(BoundaryConnection, self).__init__(2)
         self.boundary1 = boundary1
@@ -69,15 +73,23 @@ class Connection2D(BoundaryConnection):
         if a > 1 or b > 1:
             raise ValueError("2D boundaries cannot have more than two points!")
         
-        if boundary1.toArray()[a] != boundary2.toArray()[b]:
+        if boundary1.get(a) != boundary2.get(b):
             raise ValueError("Boundary defined by " + boundary1 + "[" + a + "]" + ", " + boundary2 + "[" + b + "] is not connected!")
         
-    @memoize
-    def getInfo(self):
-        return self.boundary1.toArray()[self.a]
     
-    def isConsistent(self):
-        return self.a != self.b
+    def isConsistent(self, map = {}):
+        def firstNonNone(a, b):
+            return a if a else b
+        norm1 = map.get(self.boundary1, 1)
+        norm2 = map.get(self.boundary2, 1)
+        
+        return (self.a*2-1)*norm1 != (self.b*2-1)*norm2
+    
+    def vertex(self):
+        return self.boundary1.get(self.a)
+    
+    def connectionEqual(self, other):
+        return self.vertex() == other.vertex() 
     
 class Connection3D(BoundaryConnection):
     '''
@@ -92,26 +104,27 @@ class Connection3D(BoundaryConnection):
         
         value  | Description
         -------|----------------------
-        0      | boundary.point1()
-        1      | boundary.point2()
+        0      | boundary.vertex1()
+        1      | boundary.vertex2()
         2      | boundary.point3()
     '''
     def __init__(self, boundary1, boundary2, a, b, c, d):
         super(BoundaryConnection, self).__init__(3)
         self.boundary1 = boundary1
         self.boundary2 = boundary2
+        self.a = a
+        self.b = b 
+        self.c = c 
+        self.d = d 
         
         if not filter(lambda x: x > 2, [a, b, c, d]):
             raise ValueError("3D boundaries cannot have more than three points!")
         
-        if boundary1.toArray()[a] != boundary2.toArray()[c] or \
-            boundary1.toArray()[b] != boundary2.toArray()[d] : 
+        if boundary1.get(a) != boundary2.get(c) or \
+            boundary1.get(b) != boundary2.get(d) : 
             raise ValueError("Boundary defined by " + boundary1 + "[" + a +  ", " + b +"]" + \
                      ", " + boundary2 + "[" + c + ", " + d + "] is not connected!")
 
-    @memoize
-    def getInfo(self):
-        return numpy.array([self.boundary1.toArray()[self.a], self.boundary1.toArray()[self.b]])
     
     '''
     Gives the direction of the normal with respect to the edge.
@@ -120,5 +133,24 @@ class Connection3D(BoundaryConnection):
     def parity(self, a, b):
         return (b + 1 % 3) == a 
     
-    def isConsistent(self):
-        return self.parity(self.a, self.b) == self.parity(self.d, self.c)
+    def isConsistent(self, map = {}):
+        norm1 = map.get(self.boundary1, 1)
+        norm2 = map.get(self.boundary2, 1)
+        
+        return (2 * self.parity(self.a, self.b) - 1) * norm1 \
+            == (2 * self.parity(self.d, self.c) - 1) * norm2
+    
+    def connectionEdge(self):
+        return numpy.array([self.boundary1.get(self.a), self.boundary1.get(self.b)])
+    
+    def vertex1(self):
+        return self.boundary1.get(self.a)
+    
+    def vertex2(self):
+        return self.boundary1.get(self.b)
+    
+    def connectionEqual(self, other):
+        return (self.vertex1() == other.vertex1() \
+                and self.vertex2() == other.vertex2()) \
+            or (self.vertex1() == other.vertex2() \
+                and self.vertex2() == other.vertex1())  

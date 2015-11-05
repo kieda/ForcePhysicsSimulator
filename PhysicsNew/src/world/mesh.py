@@ -65,12 +65,14 @@ class Mesh(object):
         # boundaries are paired with their respective faces
         self.boundaries = boundaries
         self.neighborMap = self._buildNeighborMap() # map of boundary -> neighboring boundaries
-        self.normals = self._calculateNormals()
+        
         
         if self._isConnected():
             raise ValueError("Specified mesh is disconnected!")
         
-        self.faces = None # calculated faces
+        self.normals = self._calculateNormals()
+        
+        self.faces = self._buildFaces() # calculated faces
     
     def _buildNeighborMap(self):
         '''
@@ -132,7 +134,23 @@ class Mesh(object):
         '''
         @return: True iff this mesh is a closed surface.
         '''
-        
+        for boundary, neighbors in self.neighborMap:
+            #need dim neighbors
+            
+            if len(neighbors) != self.dim:
+                return False
+            
+            for i, (neighbori, edgei) in enumerate(neighbors):
+                for (neighborj, edgej) in neighbors[i+1:]:
+                    # for each neighbor i, check that the other neighbors
+                    # are not defining the same boundary.
+                    
+                    if edgei.connectionEqual(edgej) :
+                        # we know that edgei and edgej are not the same,
+                        # yet generate the same connection. So, we 
+                        # know that we have too many edges on this boundary. 
+                        return False
+                    
         return True
     
     def _calculateNormals(self):
@@ -141,7 +159,62 @@ class Mesh(object):
         -1 or 1. -1 if we want to flip the normal, 1 otherwise.
         @requires: self.neighborMap is defined and built correctly
         '''
-        return 
+        
+        '''
+        Here we treat the mesh as a graph G = (V, E) such that 
+        \forall v \in V. deg(v) = self.dim
+        
+        and \forall (v1, v2) \in E. weight(v1, v2) = v1.consistent(v2)
+        
+        Our goal is to change all weight(e) such that all edges are consistent.
+        Note that we can only change an edge's consistency by flipping all of the
+        neighbors of a single vertex.
+        
+        We perform a DFS, maintaining a set of visited nodes X.
+        
+        On vertex v, we flip if necessary, put v into X, then continue.
+        
+        We flip iff both conditions are satisfied.
+        a. \exists neighbor \in N(v). \not v.consistent(neighbor)
+        b. \exists neighbor \in (N(v) \cap X). v.consistent(neighbor) 
+        
+        a. essentially means that we will not flip when all edges are already consistent (performance reasons, not actually required)
+        b. means that we will not flip when this would make a visited edge inconsistent with this one. (required)
+        '''
+        visited = set()
+        frontier = [self.boundaries[0]]
+        
+        # initially set all normals to 1
+        normals = {i:1 for i in self.boundaries}
+        
+        # returns the consistency of the two meshes modified by the normals.
+        def isConsistent(connection):
+            return connection.isConsistent(normals)
+        
+        def flipBoundary(boundary):
+            normals[boundary] *= -1 # flip using sign
+            return
+        
+        while True:
+            next = frontier.pop()
+            if next in visited:
+                continue
+            
+            flip = False
+            for (neighbor, edge) in self.neighborMap[next]:
+                if not isConsistent(edge): 
+                    flip = True
+                if (neighbor in visited) and isConsistent(edge):
+                    flip = False
+                    break
+            if flip:
+                flipBoundary(next)
+                
+            visited.add(next)
+            if len(frontier) == 0:
+                break
+            
+        return normals
     
     @memoize
     def volume(self):
@@ -156,6 +229,11 @@ class Mesh(object):
         
     def getFaces(self):
         return self.faces
+    
+    def _buildFaces(self):
+        # construct the faces for the boundary.
+        # at least four (tetrahedron), at most len(boundaries) (none are parallel and adjacent)
+        return []
     
 # we provide these methods in case the user wants to 
 # have a consitency of material. 
