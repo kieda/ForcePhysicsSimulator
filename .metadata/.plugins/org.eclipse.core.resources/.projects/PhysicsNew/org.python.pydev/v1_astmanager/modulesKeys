@@ -7,6 +7,7 @@ world.connection|/Users/zkieda/Documents/workspace/PhysicsNew/src/world/connecti
 world.dynamicMesh|/Users/zkieda/Documents/workspace/PhysicsNew/src/world/dynamicMesh.py
 world.dynamicObject|/Users/zkieda/Documents/workspace/PhysicsNew/src/world/dynamicObject.py
 world.dynamicParticle|/Users/zkieda/Documents/workspace/PhysicsNew/src/world/dynamicParticle.py
+world.face|/Users/zkieda/Documents/workspace/PhysicsNew/src/world/face.py
 world.mesh|/Users/zkieda/Documents/workspace/PhysicsNew/src/world/mesh.py
 world.movableMesh|/Users/zkieda/Documents/workspace/PhysicsNew/src/world/movableMesh.py
 world.movableObject|/Users/zkieda/Documents/workspace/PhysicsNew/src/world/movableObject.py

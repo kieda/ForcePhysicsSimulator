@@ -1,0 +1,17 @@
+'''
+Created on Nov 5, 2015
+
+@author: zkieda
+'''
+
+class Face:
+    '''
+    classdocs
+    '''
+
+
+    def __init__(self, params):
+        '''
+        Constructor
+        '''
+        

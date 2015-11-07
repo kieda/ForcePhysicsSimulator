@@ -1,0 +1,161 @@
+=== General Use Readme ===
+
+General note : we set up the simulator much like a 
+class-based object oriented system (which is a bit different 
+from what you would expect from a python program)
+
+Important: when using and extending this platform, make 
+sure that extend it in a sensible manner. A lot of effort
+was put into the design patterns of this engine to allow
+
+
+** Packages **
+
+world
+    Classes that are used to construct the simulation. 
+    Everything that can be added to the simulation 
+    adheres to the signature "WorldObject"
+
+    WorldObject:
+        Represents an abstract object that can be added to
+        this world and simulated. Contains over-ridable
+        information about collisions.
+
+        Direct Subclasses: StaticObject, DynamicObject.
+
+        All Subclasses: StaticObject, DynamicObject, MovableObject,
+        StaticMesh, DynamicMesh, MovableMesh, DynamicParticle, 
+        MovableParticle.
+
+    StaticObject:
+        Represents an abstract object that is not
+        affected by external forces while the simulation
+        is running. Massless.
+
+        Direct/All Subclasses: StaticMesh
+
+    DynamicObject:
+        Represents an abstract object that is affected
+        by external forces while the simulation is running,
+        but does not have the ability to be affected dynamically
+        by a client. These objects merely move and collide freely.
+
+        Direct Subclasses: DynamicMesh, DynamicParticle, MovableObject
+        All Subclasses: DynamicMesh, DynamicParticle, MovableObject,
+        MovableMesh, MovableParticle
+
+    MovableObject:
+        Represents a DynamicObject which also can be controlled by
+        the client. A client has the option of applying a force to 
+        this object at any time during the simulation.
+
+        Direct/All Subclasses: MovableMesh, MovableParticle
+
+    BoundaryPlane:
+        Represents a boundary plane which defines a collision surface
+        for either two or three dimensions. These are the building 
+        blocks used inside of meshes. In two dimensions, a boundary
+        plane is represented by two points in the plane which form
+        a segment. In three dimensions, it is represened by three
+        endpoints of a triangle
+
+        Direct/All Subclasses: BoundaryPlane2D, BoundaryPlane3D
+
+    
+
+    Mesh:
+        Represents a surface for collision detection. A mesh
+        has 0 or more boundary planes that define its collision
+        boundaries. Note that a mesh is completely disjoint from the
+        dimension of the mesh. The implementation classes BoundaryPlane2D/3D
+        and BoundaryConnection2D/3D provide all of the necessary information
+        relevant to the 3d and 2d case of a mesh. 
+
+        Direct/All Subclasses: StaticMesh, DynamicMesh, MovableMesh.
+        
+	Face:
+		Represents a series of parallel boundaries that can be reduced to
+		one simple face. This is for optimization purposes, as well as 
+		giving the client higher level information about events that 
+		have occurred. Note that Face, much like the Mesh class, is
+		completely independent of the dimension of the face it's representing.
+		What neat design! 
+		
+    StaticMesh:
+        Represents a surface that uses a Mesh as its collision boundary,
+        and exhibits the same runtime behavior as a StaticObject.
+
+    DynamicMesh:
+        Represents a mesh that is affected by external forces. 
+        A DynamicMesh must be a closed surface.
+
+    MovableMesh:
+        Just like the DynamicMesh, except it can be affected
+        by active forces from the client.
+
+    Particle:
+        Represents a single, infinitesimally small point in space.
+        Since particles are infinitesimally small, we assume that
+        they do not collide with each other.
+
+    DynamicParticle:
+        A particle that is affected by external forces, but can not be 
+        directly moved by the client.
+
+    MovableParticle:
+        A particle that is affected by external forces and can be directly 
+        moved by the client.
+
+event
+    Classes that control the event structure of
+    the simulator. An event occurs when there is some
+    behavoir that will affect the runtime velocities
+    or acceleration of an object. An example event 
+    is collision, since the velocity of the dynamic objects
+    involved will change as a result of the collision.
+
+controller
+    Provides classes that allow the client
+    to dymanically control the forces affecting 
+    active objects during the simulation process.
+   
+    Handle:
+        
+        A "handle" that the client uses to apply forces
+        to the active scene. The handle allows the client
+        to remove forces or add forces at a future time. 
+
+        A handle allows the client to traverse back to
+        previous edits made to the handle to allow 
+        a tree-traversal like decision making process 
+        possible.
+
+    Controller: 
+    
+        An interface that controls the handle until
+        the handle has reached some final, desirable state.
+
+    serializeHandle.py:
+        
+        Allows a handle to be serialized into a script
+        that can be read by an external program to be run.
+        A client sends the "final handle" state, then the program
+        will serialize all of the steps that it took to get to that
+        final state.
+
+(default package)
+    These are classes that contain logic for constructing
+    the problem, the problem's parameters, and running it.
+    This is the main entry point for a client.
+
+    Problem: 
+        Lets the client define a "problem" based on a controller,
+        simulation, and world that should be run.
+
+    Simulation:
+        Defines parameters important to the simulation.
+
+** Possible Future Classes ***
+Joint/Bone, which will be useful for hand simulation. A bone will
+be a DynamicObject with 1 or more joint locations. A joint will merely
+connect two bones together.

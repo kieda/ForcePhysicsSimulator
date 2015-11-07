@@ -4,6 +4,12 @@ General note : we set up the simulator much like a
 class-based object oriented system (which is a bit different 
 from what you would expect from a python program)
 
+Important: when using and extending this platform, make 
+sure that extend it in a sensible manner. A lot of effort
+was put into the design patterns of this engine to allow
+extensibility. I highly suggest against monkey patching
+and I will be displeased.
+
 ** Packages **
 
 world
@@ -61,10 +67,21 @@ world
     Mesh:
         Represents a surface for collision detection. A mesh
         has 0 or more boundary planes that define its collision
-        boundaries.
+        boundaries. Note that a mesh is completely disjoint from the
+        dimension of the mesh. The implementation classes BoundaryPlane2D/3D
+        and BoundaryConnection2D/3D provide all of the necessary information
+        relevant to the 3d and 2d case of a mesh. 
 
         Direct/All Subclasses: StaticMesh, DynamicMesh, MovableMesh.
-
+        
+	Face:
+		Represents a series of parallel boundaries that can be reduced to
+		one simple face. This is for optimization purposes, as well as 
+		giving the client higher level information about events that 
+		have occurred. Note that Face, much like the Mesh class, is
+		completely independent of the dimension of the face it's representing.
+		What neat design! 
+		
     StaticMesh:
         Represents a surface that uses a Mesh as its collision boundary,
         and exhibits the same runtime behavior as a StaticObject.

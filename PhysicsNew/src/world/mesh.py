@@ -1,52 +1,9 @@
 from test.test_decorators import memoize
 from world.staticObject import StaticObject
+from world.face import Face
 import numpy
 import array
-
-
-class Face(StaticObject):
-    '''
-    A face represents a series of boundaries that
-    are parallel to one another.
-    
-    When the user specifies a series of triangles that
-    form a polygon in three-space, it's useful to treat it like a
-    single object, so we don't emit an excessive number of boundary crossing
-    events as a particle moves across the polygon's surface.
-    '''
-    def __init__(self, dim, boundaries):
-        #initial position is just (0, 0, 0) in its own local space.
-        #we transform this as we go in the face's local space, then
-        #translate wrt the mesh's world position.
-        super(StaticObject, self).__init__(dim, numpy.zeros(dim))
-        self.boundaries = boundaries
         
-        if not self._checkBoundaries():
-            raise ValueError("All boundaries specified are not parallel in this face " + boundaries)
-        
-    def _checkBoundaries(self):
-        '''
-        Checks that all boundaries inside of this face are indeed parallel.
-        '''
-        
-        if len(self.boundaries) == 0 :
-            return True
-        ''' 
-        Use this method since parallelism is transitive and symmetric 
-        '''
-        b0 = self.boundaries[0]
-        for bi in self.boundaries[1:]:
-            if not b0.isParallel(bi):
-                return False
-        
-        return True
-    
-    @memoize
-    def getExterior(self):
-        '''
-        returns an array of all of the boundaries that are on the outside of this
-        face. This is nice if we want to find all of the faces adjacent to this one
-        '''
         
 class Mesh(object):
     '''
@@ -63,7 +20,12 @@ class Mesh(object):
             raise ValueError("A mesh must contain one or more boundaries!")
         
         # boundaries are paired with their respective faces
+        self.dim = dim
         self.boundaries = boundaries
+        
+        if not self._checkDimensions():
+            raise ValueError("Not all boundaries specified have dimension " + dim + "!")
+        
         self.neighborMap = self._buildNeighborMap() # map of boundary -> neighboring boundaries
         
         
@@ -72,7 +34,17 @@ class Mesh(object):
         
         self.normals = self._calculateNormals()
         
-        self.faces = self._buildFaces() # calculated faces
+        self.faceMap, self.faces = self._buildFaces() # calculated faces
+    
+    def _checkDimensions(self):
+        '''
+        quick check to see if all of the dimensions work out as
+        expected.
+        '''
+        for boundary in self.boundaries:
+            if boundary.dim != self.dim:
+                return False
+        return True
     
     def _buildNeighborMap(self):
         '''
@@ -230,10 +202,44 @@ class Mesh(object):
     def getFaces(self):
         return self.faces
     
+    def getFaceMap(self):
+        return self.faceMap
+    
     def _buildFaces(self):
+        '''
+        Construct faces. Here, we run a DFS from each boundary, and stop traversing the 
+        DFS when we meet another boundary that is not parallel to this one.
+        
+        @return: faceMap, faces. faceMap is a map that goes from boundary -> face, such
+        that faceMap[boundary] is the face that the specified boundary belongs to. faces
+        represents all faces that are present inside of this mesh.
+        '''
         # construct the faces for the boundary.
         # at least four (tetrahedron), at most len(boundaries) (none are parallel and adjacent)
-        return []
+        faces = []
+        faceMap = {}
+        visited = set()
+        for boundary in self.boundaries:
+            if boundary in visited:
+                continue
+            frontier = [boundary]
+            faceBoundaries = []
+            while True:
+                next = frontier.pop()
+                if next in visited:
+                    continue
+                visited.add(next)
+                faceBoundaries.append(next)
+                for neighbor, edge in self.neighborMap[boundary]:
+                    if next.isParallel(neighbor):
+                        frontier.append(neighbor)
+                if len(frontier) == 0:
+                    break
+            face = Face(self.dim, faceBoundaries, self.boundaryMap)
+            faces.append(face)
+            for b in faceBoundaries:
+                faceMap[b] = face
+        return faceMap, faces
     
 # we provide these methods in case the user wants to 
 # have a consitency of material. 
