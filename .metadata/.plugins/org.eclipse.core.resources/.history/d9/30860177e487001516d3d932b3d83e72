@@ -1,0 +1,17 @@
+'''
+Created on Nov 10, 2015
+
+@author: zkieda
+'''
+
+class Context(object):
+    '''
+    classdocs
+    '''
+
+
+    def __init__(self, params):
+        '''
+        Constructor
+        '''
+        

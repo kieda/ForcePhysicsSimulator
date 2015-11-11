@@ -1,0 +1,10 @@
+class Context(object):
+    '''
+    Represents a context
+    '''
+
+
+    def __init__(self):
+        '''
+        '''
+        

@@ -1,0 +1,110 @@
+from abc import abstractmethod
+from world.world import World
+from timeit import itertools
+
+
+'''
+Summary of 
+'''
+
+class Generator(object):
+    '''
+    A generator is a class that accepts a world 
+    then produces a series of event contexts in the 
+    form of an iterable. This iterable is accessable
+    through the __iter__ method and must be implemented
+    '''
+    def __init__(self, world):
+        if not isinstance(world, World):
+            raise TypeError("World \"{}\" passed as parameter to Generator is not of instance of class World".format(world))
+        self.world = world
+        
+    @abstractmethod
+    def __iter__(self):
+        '''
+        Generates a series of contexts that describes the space of 
+        events that is being described by this generator.
+        
+        @return: a finite-sized iterator where each element is 
+        instance of Context. 
+        
+        @see: event.context.Context
+        '''
+        return
+    
+''' *** Compositional Generators *** '''
+    
+'''
+Compositional generators are generators that provide the functionality
+of splitting up the world into some set X such that \forall x \in X. 
+x \subseteq world. This generator is composed with a different generator
+that transforms x \in X to some context.
+'''
+
+class AggregateGenerator(Generator):
+    '''
+    Aggregator generator class.
+    
+    Example Usage : 
+    
+    agg = AggregateGenerator(world, [ParticleMeshCollision, MeshMeshCollision])
+    '''
+    def __init__(self, world, generators):
+        '''
+        Is a generator that aggregates many other generators
+        @param world: the world used for this aggregate generator
+        @param generators: a list of generators that we use to produce
+        all events in this world.
+        '''
+        super(self, Generator).__init__(world)
+        
+        # create a generator with the current world as the parameter.
+        self.generators = generators.map(lambda g : g(world))
+    
+    def __iter__(self):
+        # simply chain together all of the generators
+        return itertools.chain.from_iterable(self.generators)
+
+class CompositionalGenerator(Generator):
+    def __init__(self, enumerationFn, internalGeneratorFn):
+ 
+class ParticleFaceGenerator(Generator):
+    '''
+    A particle-face generator. Generates the set X such that
+    
+    X = \{x | x \in particles(world)\} \times \{x | x \in faces(world)\}
+    
+    Example: use the particle face generator to enumerate all possible collisions
+    between particles and faces.
+    '''
+    def __init__(self, world, conversionFn):
+        '''
+        @param world: the world that we will use to generate subsets of this world
+        @param conversionFn: a function that converts our world subsets to event contexts
+        '''
+        super(Generator, self).__init__(world)
+        self.conversionFn = conversionFn
+    
+    def accept(self, particle, face):
+        '''
+        Allow a client to override the accept method, in case 
+        they want to filter out particular particle/faces
+        '''
+        return True
+    
+    class _Iterable:
+        '''
+        Why is making a valid iterator so painful in python?
+        '''
+        
+        def __init__(self, outer):
+            self.outer = outer
+            
+        def next(self):
+            
+            return
+        
+    @abstractmethod
+    def __iter__(self):
+        return self._Iterable(self)        
+    

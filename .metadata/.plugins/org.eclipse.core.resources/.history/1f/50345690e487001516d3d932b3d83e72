@@ -1,0 +1,12 @@
+from abc import abstractmethod
+class Context(object):
+    '''
+    Represents a context
+    '''
+
+
+    def __init__(self):
+        '''
+        '''
+    
+    @abstractmethod

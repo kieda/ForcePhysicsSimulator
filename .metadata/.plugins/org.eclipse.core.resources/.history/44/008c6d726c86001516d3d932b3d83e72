@@ -1,0 +1,7 @@
+from world.dynamicObject import DynamicObject
+from world.mesh import Mesh
+
+class DynamicMesh(Mesh, DynamicObject):
+    def __init__(self, boundaries, dim, ):
+        
+        

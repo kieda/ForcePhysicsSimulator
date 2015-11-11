@@ -1,0 +1,21 @@
+from abc import abstractmethod
+class Context(object):
+    '''
+    Represents a context
+    '''
+
+
+    def __init__(self):
+        '''
+        '''
+    
+    @abstractmethod
+    def getTime(self):
+        '''
+        
+        '''
+        return 
+    
+    @abstractmethod
+    def getEvent(self):
+        return 

@@ -1,0 +1,17 @@
+'''
+Created on Nov 11, 2015
+
+@author: zkieda
+'''
+
+class Generator(object):
+    '''
+    classdocs
+    '''
+
+
+    def __init__(self, params):
+        '''
+        Constructor
+        '''
+        

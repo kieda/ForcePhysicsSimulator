@@ -40,6 +40,10 @@ class Face(StaticObject):
         #we transform this as we go in the face's local space, then
         #translate wrt the mesh's world position.
         super(StaticObject, self).__init__(dim, numpy.zeros(dim))
+        
+        if len(self.boundaries) == 0 :
+            raise ValueError("Expected >1 boundaries inside of a Face!")
+        
         self.boundaries = boundaries
         self.boundaryMap = boundaryMap
         
@@ -60,8 +64,6 @@ class Face(StaticObject):
         Checks that all boundaries inside of this face are indeed parallel.
         '''
         
-        if len(self.boundaries) == 0 :
-            return True
         ''' 
         Use this method since parallelism is transitive and symmetric 
         '''
@@ -88,10 +90,12 @@ class Face(StaticObject):
                     
         # exterior now contains a list of boundaries that are on the outer edge of the face.
         # now, we just need to sort them.
-        return self._sortExterior(exterior)
+        return exterior#self._sortExterior(exterior)
     
     def _sortExterior(self, exteriorInitial):
         '''
+        *** TODO fix in the 2d case -- face will not wrap around as in 3d case
+        
         Sorting the exterior: find a sequence a_0... a_{n-1}, where n is the 
         number of edges in the exterior.
         

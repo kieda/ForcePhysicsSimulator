@@ -1,0 +1,53 @@
+from abc import abstractmethod
+class Context(object):
+    '''
+    Represents a context that may generate a single 
+    event.
+    '''
+
+    def __init__(self, world):
+        self.world = world
+        return
+    
+    @abstractmethod
+    def getTime(self):
+        '''
+        Returns an expected time for this event to occur.
+        
+        For example, suppose we wanted to test a collision of
+        a particle and a complex face. We can return the amount
+        of time it will take for the particle to hit the face
+        of the infinitely spanning object.
+        
+        Return None if we know immediately that this event 
+        will never occur, and the event will not be added to the 
+        queue or processed. 
+        
+        If the event in this context occurs, the time returned here
+        cannot differ from the time from the  actual event returned
+        by getEvent. 
+        '''
+        return 
+    
+    @abstractmethod
+    def getEvent(self):
+        '''
+        Returns the event that this context represents, if there
+        is one. If the event does not occur, return None.
+        
+        @return: Some subclass of Event
+        '''
+        return 
+
+''' *** Compositional Generators *** '''
+    
+'''
+Compositional generators are generators that provide the functionality
+of splitting up the world into some set X such that \forall x \in X. 
+x \subseteq world. This generator is composed with a different generator
+that transforms the 
+
+'''
+class PointFaceContext(Context):
+    '''
+    '''

@@ -1,0 +1,12 @@
+class World:
+    def __init__(self, dim):
+        self.dim = dim
+        self.worldObjects = []
+        return
+    
+    def addWorldObject(self, worldObject):
+        assert worldObject.dim == self.dim, "Incorrect dimension for worldObject %r" % worldObject
+        self.worldObjects.append(worldObject)
+    
+    def addDynamicObject(self, dynamicObject):
+    

@@ -1,0 +1,59 @@
+from abc import abstractmethod
+from world.world import World
+class Generator(object):
+    '''
+    A generator is a class that accepts a world 
+    then produces a series of event contexts in the 
+    form of an iterable. This iterable is accessable
+    through the __iter__ method and must be implemented
+    '''
+    def __init__(self, world):
+        if not isinstance(world, World):
+            raise TypeError("World \"{}\" passed as parameter to Generator is not of instance of class World".format(world))
+        self.world = world
+        
+    @abstractmethod
+    def __iter__(self):
+        '''
+        Generates a series of contexts that describes the space of 
+        events that is being described by this generator.
+        
+        @return: a finite-sized iterator where each element is 
+        instance of Context. 
+        
+        @see: event.context.Context
+        '''
+        return
+    
+''' *** Compositional Generators *** '''
+    
+'''
+Compositional generators are generators that provide the functionality
+of splitting up the world into some set X such that \forall x \in X. 
+x \subseteq world. This generator is composed with a different generator
+that transforms x \in X to some context.
+'''
+
+class ParticleFaceGenerator(Generator):
+    '''
+    A particle-face generator. Generates the set X such that
+    
+    X = \{x | x \in particles(world)\} \times \{x | x \in faces(world)\}
+    
+    Example: use the particle face generator to enumerate all possible collisions
+    between particles and faces.
+    '''
+    def __init__(self, world):
+        super(Generator, self).__init__(world)
+    
+    def accept(self, particle, face):
+        '''
+        Allow a client to override the accept method, in case 
+        they want to filter out particular 
+        '''
+        return True
+      
+    @abstractmethod
+    def __iter__(self):
+        return Generator.__iter__(self)
+    

@@ -1,0 +1,482 @@
+import sys
+import math
+
+import numpy as np
+
+import event
+
+class World:
+    def __init__(self):
+        self.numDimensions = 3
+        self.gravity = np.zeros(self.numDimensions)
+        self.particleList = []
+        self.collisionPlanes = []
+
+        self.collisionEpsilon = 0.001
+        self.velocityEpsilon = 0.01
+        self.forceEpsilon = 0.00001    # if this value is too high, quadratic time-to-collision calculations will be off
+        self.timeEpsilon = 0.001
+
+    def addParticle(self, pIn):
+        assert pIn.startPosition.size == self.numDimensions
+        self.particleList.append(pIn)
+
+    def addCollisionPlane(self, cpIn):
+        assert cpIn.normal.size == self.numDimensions
+        self.collisionPlanes.append(cpIn)
+
+    def setToInitialState(self):
+        for p in self.particleList:
+            p.setToInitialState()
+
+    def getNumberOfActiveObjects(self):
+        return len(self.particleList)
+
+    def getActiveObject(self, pIndex):
+        return self.particleList[pIndex]
+
+
+    # forceInfo is flattened array phase X movingObject X dimensions
+    # this method returns the force from the forceInfo array *plus* whatever gravity is in the world
+    def getForce(self, forceInfo, phase, pIndex):
+
+        # find the correct indices into the flat array
+        activeObjects = self.getNumberOfActiveObjects()
+        indexStart = phase*activeObjects*self.numDimensions + pIndex*self.numDimensions
+        indexEnd = indexStart+self.numDimensions
+
+        # return force from the flattened array plus gravity
+        return forceInfo[indexStart:indexEnd] + self.gravity
+
+
+    def sqrDistFromGoal(self):
+        dist = 0.
+        for p in self.particleList:
+            dist += p.sqrDistFromGoal()
+        return dist
+
+    def sqrVelocityError(self):
+        err = 0.
+        for p in self.particleList:
+            err += p.sqrVelocityError()
+        return err
+
+    def sqrForceDiffs(self, forceInfo, numPhases):
+        diff = 0
+        numActiveObjects = self.getNumberOfActiveObjects()
+        for pIndex in range(numActiveObjects):
+            lastForce = self.gravity
+            for phase in range(0,numPhases):
+                currForce = self.getForce(forceInfo, phase, pIndex)
+                localDiff = (currForce-lastForce)
+                diff += np.dot(localDiff, localDiff)
+                lastForce = currForce
+            localDiff = (self.gravity - lastForce)
+            diff += np.dot(localDiff, localDiff)
+
+        return diff
+
+
+class Particle:
+    def __init__(self, posIn, velIn, goalPosIn, goalVelIn):
+        self.startPosition = posIn.copy()
+        self.startVelocity = velIn.copy()
+
+        self.position = posIn.copy()
+        self.velocity = velIn.copy()
+
+        self.goalPosition = goalPosIn.copy()
+        self.goalVelocity = goalVelIn.copy()
+
+        self.collisionManifolds = []
+
+    def setPosition(self, pos):
+        self.position = pos
+
+    def setVelocity(self, vel):
+        self.velocity = vel
+
+    def setToInitialState(self):
+        self.position = self.startPosition.copy()
+        self.velocity = self.startVelocity.copy()
+        self.collisionManifolds = []
+
+    def addCollisionManifold(self, manifold):
+        self.collisionManifolds.append(manifold)
+        # print "adding manifold at position {} .. {} manifolds".format(self.position, len(self.collisionManifolds))
+
+    def removeCollisionManifold(self, manifold):
+        self.collisionManifolds.remove(manifold)
+        # print "removing manifold at position {} .. {} manifolds".format(self.position, len(self.collisionManifolds))
+
+    def onManifold(self, manifold):
+        return (manifold in self.collisionManifolds)
+
+    def onSomeManifold(self):
+        return (len(self.collisionManifolds) > 0)
+
+    def clampToManifolds(self, vectorIn):
+        vectorRet = np.copy(vectorIn)
+        for manifold in self.collisionManifolds:
+            vectorRet = manifold.clampToManifold(vectorRet)
+        return vectorRet
+
+#this is refactored out -- should be defined client side of the 
+    def sqrDistFromGoal(self):
+        diff = self.goalPosition-self.position
+        return np.dot(diff, diff)
+
+    def sqrVelocityError(self):
+        diff = self.goalVelocity-self.velocity
+        return np.dot(diff, diff)
+
+
+# defined by pointOnPlane, direction, and offset, 
+#   .. such that (pointOnPlane + direction*offset) is on the boundary
+#   .. and (np.dot((q - pointOnPlane), direction) > offset) means that we are beyond the collision surface
+class CollisionPlaneBoundary:
+    def __init__(self, pointOnPlaneIn, directionIn, offsetIn, manifoldIn):
+        self.pointOnPlane = pointOnPlaneIn
+        self.direction = directionIn
+        self.offset = offsetIn
+        self.manifold = manifoldIn
+
+    def pointWithinBoundary(self, point, collisionEpsilon):
+        return (np.dot((point-self.pointOnPlane), self.direction) < self.offset)
+
+
+    def getCrossingLinear(self, position, velocity, collisionEpsilon):
+
+        # get the velocity component in the offset direction .. positive moving towards the boundary
+        velocityInOffsetDirection = np.dot(velocity, self.direction)
+
+        # distance to go in the normal direction
+        positionDifference = position - self.pointOnPlane
+        differenceInOffsetDirection = np.dot(positionDifference, self.direction) - self.offset - collisionEpsilon
+
+        # if we are already pretty much at the boundary, and velocity is exiting the interior
+        #   .. project to the boundary and return a BoundaryCrossing at time zero
+        if (np.fabs(differenceInOffsetDirection) < collisionEpsilon) and (velocityInOffsetDirection > 0):
+            # project the little ways to the plane to avoid accumulating errors
+            newPosition = position - differenceInOffsetDirection*self.direction
+            return event.BoundaryCrossing(0.0, newPosition, self.manifold)
+
+        # if we are not headed substantially towards the boundary, don't worry about it
+        if (velocityInOffsetDirection < collisionEpsilon):
+            return None
+
+        # if the difference in the offset direction is positive, 
+        #   .. we are already outside the surface and there is a problem
+        if (differenceInOffsetDirection > 0):
+            print "we seem to be outside the boundary of this manifold"
+            print "position {}".format(position)
+            print "direction {}".format(self.direction)
+            print "offset {}".format(self.offset)
+            print "point on plane {}".format(self.pointOnPlane)
+            print "diff in offset direction {}".format(differenceInOffsetDirection)
+            sys.exit(0)
+
+        # get the crossing point and time, make a new BoundaryCrossing, and return it
+        timeToCrossing = -1.0 * differenceInOffsetDirection / velocityInOffsetDirection
+        crossingPoint = position + timeToCrossing*velocity
+        return event.BoundaryCrossing(timeToCrossing, crossingPoint, self.manifold)
+
+
+
+    def getCrossingQuadratic(self, position, velocity, force, collisionEpsilon, forceEpsilon):
+
+        # first check if there is any significant force
+        normalForce = np.dot(force, self.direction)
+        if (np.fabs(normalForce) < forceEpsilon):
+            # not enough force to bother with .. zero it out to avoid inconsistencies later
+            force -= normalForce*self.direction
+            return self.getCrossingLinear(position, velocity, collisionEpsilon)
+
+        # now, compute the coefficients of the quadratic equation for time
+        A = 0.5 * normalForce
+        B = np.dot(velocity, self.direction)
+        C = np.dot((position-self.pointOnPlane), self.direction) - self.offset - collisionEpsilon
+
+        BSquared = B*B
+        FourAC = 4.0*A*C
+
+        # if there is no collision, return None
+        if FourAC > BSquared:
+            return None
+
+        # solve for two time variables
+        RootPart = math.sqrt(BSquared-FourAC)
+        TwoA = 2.0*A
+
+        deltaT1 = (-1.0*B + RootPart) / TwoA
+        deltaT2 = (-1.0*B - RootPart) / TwoA
+
+        # solve for the two velocities
+        normalVelT1 = B + normalForce*deltaT1
+        normalVelT2 = B + normalForce*deltaT2
+
+        # now figure out which to return
+        if (deltaT1 < 0) and (deltaT2 < 0):
+            # no crossing
+            return None
+
+        elif deltaT1 < 0:
+            # the second is the only positive time, but we have to check its normal velocity
+            if (normalVelT2 > 0):
+                # we have a crossing
+                crossingPoint = position + velocity * deltaT2 + 0.5 * force * deltaT2 * deltaT2
+                crossingTime = deltaT2
+            else:
+                return None
+
+        elif deltaT2 < 0:
+            # the first is the only positive time, but we have to check normal velocity
+            if (normalVelT1 > 0):
+                crossingPoint = position + velocity * deltaT1 + 0.5 * force * deltaT1 * deltaT1
+                crossingTime = deltaT1
+            else:
+                return None
+
+        elif deltaT1 < deltaT2:
+            # both times are positive, but the first comes earliest
+            if (normalVelT1 > 0):
+                crossingPoint = position + velocity * deltaT1 + 0.5 * force * deltaT1 * deltaT1
+                crossingTime = deltaT1
+            elif (normalVelT2 > 0):
+                crossingPoint = position + velocity * deltaT2 + 0.5 * force * deltaT2 * deltaT2
+                crossingTime = deltaT2
+            else:
+                return None
+
+        else:
+            # both times are positive, but the second comes earliest (or they are equal and it doesn't matter
+            if (normalVelT2 > 0):
+                crossingPoint = position + velocity * deltaT2 + 0.5 * force * deltaT2 * deltaT2
+                crossingTime = deltaT2
+            elif (normalVelT1 > 0): 
+                crossingPoint = position + velocity * deltaT1 + 0.5 * force * deltaT1 * deltaT1
+                crossingTime = deltaT1
+            else:
+                return None
+
+        return event.BoundaryCrossing(crossingTime, crossingPoint, self.manifold)
+
+
+
+# defined by q*normal = offset
+# we may not have a unit normal
+class CollisionPlane:
+    def __init__(self, normalIn, offsetIn, muIn=1.0):
+        assert (np.linalg.norm(normalIn) != 0)
+
+        self.normal = normalIn
+        self.unitNormal = normalIn / np.linalg.norm(normalIn)
+
+        self.offset = offsetIn
+        self.pointOnPlane = self.normal * self.offset
+
+        self.mu = muIn
+
+        # allows convex shapes
+        self.boundaries = []
+
+    def addBoundary(self, boundary):
+        self.boundaries.append(boundary)
+
+    def removeBoundary(self, boundary):
+        self.boundaries.remove(boundary)
+
+    def getUnitNormal(self):
+        return self.unitNormal
+
+    def getCoefficientOfFriction(self):
+        return self.mu
+
+    def distanceFromManifold(self, position):
+        positionDifference = position - self.pointOnPlane
+        return np.dot(positionDifference, self.unitNormal)
+
+    def projectToManifold(self, position):
+        positionDifference = position - self.pointOnPlane
+        normalDiff = np.dot(positionDifference, self.unitNormal)
+        return position - normalDiff*self.unitNormal
+        
+
+    # get rid of components *into* the manifold
+    def clampToManifold(self, vectorIn):
+        vectorRet = np.copy(vectorIn)
+        normalComponent = np.dot(vectorRet, self.unitNormal)
+        if (normalComponent < 0):
+            vectorRet -= normalComponent*self.unitNormal
+        return vectorRet
+
+
+    def pointWithinBoundaries(self, point, collisionEpsilon):
+        for boundary in self.boundaries:
+            if not boundary.pointWithinBoundary(point, collisionEpsilon):
+                return False
+
+        # looks like all boundaries passed the test
+        return True
+
+
+    def getFirstBoundaryCrossingLinear(self, position, velocity, collisionEpsilon):
+        
+        # init
+        firstBoundaryCrossing = None
+
+        # loop
+        for boundary in self.boundaries:
+            crossing = boundary.getCrossingLinear(position, velocity, collisionEpsilon)
+            if (crossing is not None):
+                if (firstBoundaryCrossing is None) or (crossing.time < firstBoundaryCrossing.time):
+                    firstBoundaryCrossing = crossing
+
+        # return whatever we found
+        return firstBoundaryCrossing
+
+    
+    
+    def findCollisionLinear(self, position, velocity, collisionEpsilon):
+
+        # get the velocity component in the normal direction
+        velocityInNormalDirection = np.dot(velocity, self.normal)
+
+        # distance to go in the normal direction
+        positionDifference = self.pointOnPlane - position
+        differenceInNormalDirection = np.dot(positionDifference, self.normal)
+
+        # if we are already pretty much on the plane, and velocity is *into* the manifold
+        #   .. project to the plane and return a collision at time zero
+        if (np.fabs(differenceInNormalDirection) < collisionEpsilon) and (velocityInNormalDirection < 0):
+            # project the little ways to the plane to avoid accumulating errors
+            newPosition = position + differenceInNormalDirection*self.normal
+            if self.pointWithinBoundaries(newPosition, collisionEpsilon):
+                return event.Collision(0.0, newPosition, self)
+            else:
+                return None
+
+        # if we are not headed substantially towards the plane there is no collision
+        # the comparison to collisionEpsilon is based on a nominal expected max timestep of 1 .. 
+        #  .. velocityInNormalDirection*1.0 is as far as we'd go towards the colliison plane in one such timestep
+        if (-1.0*velocityInNormalDirection < collisionEpsilon):
+            return None
+
+        # now we know we are heading towards the manifold and we are not already basically on it
+
+        # get the collision point and time, and return the collision
+        timeToCollision = differenceInNormalDirection / velocityInNormalDirection
+        collisionPoint = position + timeToCollision*velocity
+        if self.pointWithinBoundaries(collisionPoint, collisionEpsilon):
+            return event.Collision(timeToCollision, collisionPoint, self)
+        else:
+            return None
+
+
+
+    def getFirstBoundaryCrossingQuadratic(self, position, velocity, force, collisionEpsilon, forceEpsilon):
+        
+        # init
+        firstBoundaryCrossing = None
+
+        # loop
+        for boundary in self.boundaries:
+            crossing = boundary.getCrossingQuadratic(position, velocity, force, collisionEpsilon, forceEpsilon)
+            if (crossing is not None):
+                if (firstBoundaryCrossing is None) or (crossing.time < firstBoundaryCrossing.time):
+                    firstBoundaryCrossing = crossing
+
+        return firstBoundaryCrossing
+
+
+
+    def findCollisionQuadratic(self, position, velocity, force, collisionEpsilon, forceEpsilon):
+
+        # first check if there is any significant force
+        normalForce = np.dot(force, self.normal)
+        if (np.fabs(normalForce) < forceEpsilon):
+            # not enough force to bother with .. zero it out to avoid inconsistencies later
+            force -= normalForce*self.normal
+            return self.findCollisionLinear(position, velocity, collisionEpsilon)
+
+        # now, compute the coefficients of the quadratic equation for time
+        A = 0.5 * normalForce
+        B = np.dot(velocity, self.normal)
+        C = np.dot(position, self.normal) - np.dot(self.pointOnPlane, self.normal)
+
+        BSquared = B*B
+        FourAC = 4.0*A*C
+
+        # if there is no collision, return None
+        if FourAC > BSquared:
+            return None
+
+        # solve for two time variables
+        RootPart = math.sqrt(BSquared-FourAC)
+        TwoA = 2.0*A
+
+        deltaT1 = (-1.0*B + RootPart) / TwoA
+        deltaT2 = (-1.0*B - RootPart) / TwoA
+
+        # find the normal velocity at those times .. we'll ignore any "collision" where the velocity is away from the manifold
+        normalVelT1 = B + normalForce*deltaT1
+        normalVelT2 = B + normalForce*deltaT2
+
+        # now figure out which to return .. this code can and should be made simpler!
+
+        if (deltaT1 < 0) and (deltaT2 < 0):
+            # no collision
+            return None
+
+        elif deltaT1 < 0:
+            # the second is the only positive time, but we still have to check its normal velocity
+            if (normalVelT2 < 0):
+                # we have a collision...
+                collisionPoint = position + velocity * deltaT2 + 0.5 * force * deltaT2 * deltaT2
+                collisionTime = deltaT2
+            else:
+                # moving out of the plane, ignore the "collision"
+                return None
+
+        elif deltaT2 < 0:
+            # the first is the only positive time, but we have to check its normal velocity
+            if (normalVelT1 < 0):
+                # we have a collision ...
+                collisionPoint = position + velocity * deltaT1 + 0.5 * force * deltaT1 * deltaT1
+                collisionTime = deltaT1
+            else:
+                # moving out of the plane, ignore the "collision"
+                return None
+
+        elif deltaT1 < deltaT2:
+            # two positive times, we'll try the earliest first
+            if (normalVelT1 < 0):
+                # the first comes earliest and has an ok velocity direction
+                collisionPoint = position + velocity * deltaT1 + 0.5 * force * deltaT1 * deltaT1
+                collisionTime = deltaT1
+            elif (normalVelT2 < 0):
+                # the second comes later but is the one with penetrating velocity
+                collisionPoint = position + velocity * deltaT2 + 0.5 * force * deltaT2 * deltaT2
+                collisionTime = deltaT2
+            else:
+                # both are moving out of the plane.. not sure this can happen!
+                return None
+
+        else:
+            # both times are positive, but the second comes earliest (or they are equal and it doesn't matter
+            if (normalVelT2 < 0):
+                # earliest solution in time is also ok in velocity
+                collisionPoint = position + velocity * deltaT2 + 0.5 * force * deltaT2 * deltaT2
+                collisionTime = deltaT2
+            elif (normalVelT1 < 0):
+                # the first solution comes second, but is the one penetrating the plane
+                collisionPoint = position + velocity * deltaT1 + 0.5 * force * deltaT1 * deltaT1
+                collisionTime = deltaT1
+            else:
+                # .. not sure this can happen, but we don't seem to have a good velocity vector
+                return None
+
+        if self.pointWithinBoundaries(collisionPoint, collisionEpsilon):
+            return event.Collision(collisionTime, collisionPoint, self)
+        else:
+            return None

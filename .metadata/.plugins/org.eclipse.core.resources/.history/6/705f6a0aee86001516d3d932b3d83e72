@@ -1,0 +1,9 @@
+class World:
+    def __init__(self, dim):
+        self.worldObjects = []
+        return
+    
+    def addWorldObject(self, worldObject):
+        assert worldObject.dim == self.dim, "Incorrect "
+        self.worldObjects.append(worldObject)
+        

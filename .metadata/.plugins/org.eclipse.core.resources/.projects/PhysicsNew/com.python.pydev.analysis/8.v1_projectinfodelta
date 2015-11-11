@@ -1,13 +1,1 @@
-INSTUPworld.face
-/Users/zkieda/Documents/workspace/PhysicsNew/src/world/face.py
-INFOS:&&1|1|2|0&&2|3|2|1&&3|4|2|5&&3|6|2|5&&2|7|2|1&&2|8|2|1&&2|9|2|1&&2|10|2|1
-boundaryMap=6
-_checkBoundaryMap=7
-_checkBoundaries=8
-Face.__init__=5
-getExterior=9
-boundaries=4
-world.face=2
-_sortExterior=10
-Face=1
-__init__=3
+DELSTRevent.generator

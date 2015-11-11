@@ -1,4 +1,7 @@
 MODULES_MANAGER_V2
+event.context|/Users/zkieda/Documents/workspace/PhysicsNew/src/event/context.py
+event.event|/Users/zkieda/Documents/workspace/PhysicsNew/src/event/event.py
+event.generator|/Users/zkieda/Documents/workspace/PhysicsNew/src/event/generator.py
 problem|/Users/zkieda/Documents/workspace/PhysicsNew/src/problem.py
 simulation|/Users/zkieda/Documents/workspace/PhysicsNew/src/simulation.py
 world.__init__|/Users/zkieda/Documents/workspace/PhysicsNew/src/world/__init__.py

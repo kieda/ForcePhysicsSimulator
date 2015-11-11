@@ -11,6 +11,10 @@ class Mesh(object):
     in two or three dimensions.
     
     We disallow disconnected meshes.
+    
+    Note that a mesh does not include a translation or rotation inside of it.
+    Transformations are the responsibility of the WorldObject, not the mesh itself.
+    So, meshes should be defined here 
     '''
     def __init__(self, dim, boundaries):
         '''

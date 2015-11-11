@@ -17,7 +17,7 @@ class WorldObject(object):
         if dim != pos.size:
             raise ValueError("Expected pos to have size " + dim + ", instead it has size " + pos.size)
         
-        self.pos = pos
+        self.pos = pos.copy()
         self.collisions = set()
         return
     

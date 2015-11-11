@@ -42,8 +42,24 @@ class BoundaryConnection(object):
         @return: True if this connection and the other connection define
         the same edge. Note that two connections defined by two different 
         boundaries CAN define the same edge.
-        ''' 
+        '''
+        return 
     
+    @abstractmethod
+    def correlates(self, other):
+        '''
+        We say that boundary connections A and B are correlated 
+        (or A.correlates(B))
+        when the two are adjacent inside of the face. In the 
+        2D case, A and B are correlated iff they belong to the same line
+        segment.
+        
+        In the 3D case, A and B are correlated iff they share a vertex.
+        
+        @param other: the other class we will test for corelation
+        @return: True iff both of the edges are correlated 
+        '''
+        return
     
 class Connection2D(BoundaryConnection):
     '''
@@ -78,8 +94,6 @@ class Connection2D(BoundaryConnection):
         
     
     def isConsistent(self, map = {}):
-        def firstNonNone(a, b):
-            return a if a else b
         norm1 = map.get(self.boundary1, 1)
         norm2 = map.get(self.boundary2, 1)
         
@@ -91,6 +105,13 @@ class Connection2D(BoundaryConnection):
     def connectionEqual(self, other):
         return self.vertex() == other.vertex() 
     
+    def correlates(self, other):
+        for ours in [self.boundary1, self.boundary2]:
+            for others in [other.boundary1, other.boundary2]:
+                if ours is others:
+                    return True
+        return False
+        
 class Connection3D(BoundaryConnection):
     '''
     represents a connection between two 3-dimensional boundaries
@@ -153,4 +174,9 @@ class Connection3D(BoundaryConnection):
         return (self.vertex1() == other.vertex1() \
                 and self.vertex2() == other.vertex2()) \
             or (self.vertex1() == other.vertex2() \
-                and self.vertex2() == other.vertex1())  
+                and self.vertex2() == other.vertex1())
+            
+    def correlates(self, other):
+        otherVerts = [other.vertex1(), other.vertex2()] 
+        return self.vertex1() in otherVerts\
+            or self.vertex2() in otherVerts

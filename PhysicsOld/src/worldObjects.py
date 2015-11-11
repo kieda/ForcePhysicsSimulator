@@ -121,6 +121,7 @@ class Particle:
             vectorRet = manifold.clampToManifold(vectorRet)
         return vectorRet
 
+#this is refactored out -- should be defined client side of the evaluator
     def sqrDistFromGoal(self):
         diff = self.goalPosition-self.position
         return np.dot(diff, diff)

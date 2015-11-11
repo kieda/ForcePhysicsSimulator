@@ -1,0 +1,24 @@
+from abc import abstractmethod
+class Context(object):
+    '''
+    Represents a context
+    '''
+
+
+    def __init__(self):
+        '''
+        '''
+    
+    @abstractmethod
+    def getTime(self):
+        '''
+        Returns an expected time for this event to occur.
+        
+        For example, suppose we wanted to test a collision of
+        a particle and a complex face. 
+        '''
+        return 
+    
+    @abstractmethod
+    def getEvent(self):
+        return 

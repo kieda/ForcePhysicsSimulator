@@ -1,0 +1,136 @@
+'''
+Represents a series of parallel boundaries such that each boundary
+is parallel to one another. 
+
+Note that this is mostly useful in the 3d case, which all faces cannot be 
+described by triangles in 3d. 
+@author: zkieda
+'''
+from world.staticObject import StaticObject
+import numpy
+from test.test_decorators import memoize
+
+class Face(StaticObject):
+    '''
+    A face represents a series of boundaries that
+    are parallel to one another.
+    
+    When the user specifies a series of triangles that
+    form a polygon in three-space, it's useful to treat it like a
+    single object, so we don't emit an excessive number of boundary crossing
+    events as a particle moves across the polygon's surface.
+    '''
+    
+    '''
+    Note: it's possible to have a class extend Face such that 
+    we automatically tessalate the 
+    '''
+    def __init__(self, dim, boundaries, boundaryMap):
+        '''
+        Instantiate a face.
+        @param dim: the number of dimensions this face is in
+        @param boundaries: the boundaries that make up this face
+        @param boundaryMap: map of type (Boundary -> (Boundary, BoundaryConnection) list)
+        @requires: boundaries \subseteq domain(boundaryMap)
+        @requires: \forall u, v \in boundaries x boundaries. u.parallel v
+        @requires: \forall b \in boundaries b.dim == dim. 
+        @requires: \forall (u, L) \in boundaryMap. \forall (v, e) \in L. u.dim == dim, v.dim = dim, e.dim = dim, v is neighbor to u by edge e.   
+        '''
+        #initial position is just (0, 0, 0) in its own local space.
+        #we transform this as we go in the face's local space, then
+        #translate wrt the mesh's world position.
+        super(StaticObject, self).__init__(dim, numpy.zeros(dim))
+        
+        if len(self.boundaries) == 0 :
+            raise ValueError("Expected >1 boundaries inside of a Face!")
+        
+        self.boundaries = boundaries
+        self.boundaryMap = boundaryMap
+        
+        if not self._checkBoundaries():
+            raise ValueError("All boundaries specified are not parallel in this face " + boundaries)
+    
+    def _checkBoundaryMap(self):
+        '''
+        validate the boundary map
+        '''
+        for boundary in self.boundaries:
+            if boundary not in self.boundaryMap:
+                return False
+        return True
+    
+    def _checkBoundaries(self):
+        '''
+        Checks that all boundaries inside of this face are indeed parallel.
+        '''
+        
+        ''' 
+        Use this method since parallelism is transitive and symmetric 
+        '''
+        b0 = self.boundaries[0]
+        for bi in self.boundaries[1:]:
+            if not b0.isParallel(bi):
+                return False
+        
+        return True
+    
+    @memoize
+    def getExterior(self):
+        '''
+        returns an array of all of the boundaries that are on the outside of this
+        face. This is nice if we want to find all of the faces adjacent to this one
+        
+        The array is sorted such that each face is adjacent to one another.
+        '''
+        exterior = []
+        for boundary in self.boundaries:
+            for neighbor, edge in self.neighborMap:
+                if not neighbor.isParallel(boundary):
+                    exterior.append(edge)
+                    
+        # exterior now contains a list of boundaries that are on the outer edge of the face.
+        # now, we just need to sort them.
+        return exterior#self._sortExterior(exterior)
+    
+    def _sortExterior(self, exteriorInitial):
+        '''
+        *** TODO fix in the 2d case -- 
+        Sorting the exterior: find a sequence a_0... a_{n-1}, where n is the 
+        number of edges in the exterior.
+        
+        such that \forall i \in [0, n) a_i correlates a_{i+1} (where i mod n)
+        
+        
+        we say that a_i and a_{i+1} are correlated iff they are neighbors on
+        the exterior.
+        '''
+        exteriorFinal=[] # returned list
+        visited = set()
+        i = 0 # initial position
+        j = 0 # j is our counter
+        
+        '''
+        Here, we walk across the exterior of the face's boundaries. 
+        We start at the 0th exterior. For exterior i we will traverse
+        to the next edge if we have not traversed it yet and if 
+        the two edges are correlated. Then, we use the correlated edge
+        as the next edge that we are traversing from. We walk across
+        the exterior in this manner, till we have used every edge on the
+        exterior. This is unfortunately in O(n^2)
+        '''
+        while True:
+            this = exteriorInitial[i]
+            next = exteriorInitial[j]
+            if j != i and next not in visited and this.correlates(next):
+                exteriorFinal.append(next)
+                visited.add(next)
+                i = j
+                j = 0 
+                if len(exteriorFinal) == len(exteriorInitial):
+                    return exteriorFinal
+            else:
+                j = j + 1
+                if len(exteriorInitial) == j:
+                    raise ValueError("Error in creating face -- specified boundary does not have a closed exterior!")
+                
+                

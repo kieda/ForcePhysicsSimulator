@@ -1,0 +1,22 @@
+from abc import abstractmethod
+class Context(object):
+    '''
+    Represents a context
+    '''
+
+
+    def __init__(self):
+        '''
+        '''
+    
+    @abstractmethod
+    def getTime(self):
+        '''
+        Returns an expected time for this collision to occur.
+        If we know at this step that a 
+        '''
+        return 
+    
+    @abstractmethod
+    def getEvent(self):
+        return 

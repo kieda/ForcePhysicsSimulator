@@ -201,5 +201,5 @@ class Boundary3D(Boundary):
         '''
         Returns the ith vertex
         '''
-        return numpy.array([self.vertex1(), self.vertex2(), self.vertex3()])[idx]
+        return [self.vertex1(), self.vertex2(), self.vertex3()][idx]
     

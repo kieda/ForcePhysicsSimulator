@@ -1,0 +1,8 @@
+from world.staticObject import StaticObject
+from world.mesh import Mesh
+
+class StaticMesh(StaticObject, Mesh):
+    def __init__(self, dim, pos, rot):
+        super(StaticObject, self).__init__(dim, pos)
+        self.rot = rot
+        return
